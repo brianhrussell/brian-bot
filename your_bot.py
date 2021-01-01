@@ -1,6 +1,7 @@
 import sys
 
 import settings
+import secrets
 import discord
 import message_handler
 
@@ -74,7 +75,7 @@ def main():
         await common_handle_message(after)
 
     # Finally, set the bot running
-    client.run(settings.BOT_TOKEN)
+    client.run(secrets.BOT_TOKEN)
 
 ###############################################################################
 
