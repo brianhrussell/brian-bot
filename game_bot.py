@@ -4,6 +4,7 @@ import settings
 import secrets
 import discord
 import message_handler
+import game_tracker
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from events.base_event              import BaseEvent
@@ -30,7 +31,7 @@ def main():
     # on_ready may be called multiple times in the event of a reconnect,
     # hence the running flag
     @client.event
-    async def on_ready():
+    async def on_ready(): # pylint: disable=unused-variable
         if this.running:
             return
 
@@ -54,6 +55,9 @@ def main():
         sched.start()
         print(f"{n_ev} events loaded", flush=True)
 
+        if game_tracker.global_tracker != None:
+            print(f'{len(game_tracker.global_tracker.supported_games)} game(s) loaded: \n{game_tracker.global_tracker.supported_games}')
+
     # The message handler for both new message and edits
     async def common_handle_message(message):
         text = message.content
@@ -67,11 +71,11 @@ def main():
                 raise
 
     @client.event
-    async def on_message(message):
+    async def on_message(message): # pylint: disable=unused-variable
         await common_handle_message(message)
 
     @client.event
-    async def on_message_edit(before, after):
+    async def on_message_edit(before, after): # pylint: disable=unused-variable
         await common_handle_message(after)
 
     # Finally, set the bot running
