@@ -1,30 +1,20 @@
+import game_tracker
 import games
 import settings
-from commands.base_command  import BaseCommand
-from utils                  import get_emoji
-import game_tracker
+from games.base_game import BaseGame
+from utils import get_emoji
+
+from commands.base_command import BaseCommand
 
 
 class StartGame(BaseCommand):
 
     def __init__(self):
-        # A quick description for the help message
         description = 'Start a game.'
-        # A list of parameters that the command will take as input
-        # Parameters will be separated by spaces and fed to the 'params' 
-        # argument in the handle() method
-        # If no params are expected, leave this list empty or set it to None
         params = None
         super().__init__(description, params)
 
-    # Override the handle() method
-    # It will be called every time the command is received
     async def handle(self, params, message, client):
-        # 'params' is a list that contains the parameters that the command 
-        # expects to receive, t is guaranteed to have AT LEAST as many
-        # parameters as specified in __init__
-        # 'message' is the discord.py Message object for the command to handle
-        # 'client' is the bot Client object
 
         guild = message.guild
 
@@ -37,10 +27,18 @@ class StartGame(BaseCommand):
         try:
             game_name = params[0]
             # start a game in the tracker and set the leader to this user
+            game_leader = message.author
+            game_moderator = _construct_game_moderator(game_name, guild, game_leader)
+            game_tracker.global_tracker.add_game(guild, game_moderator)
             msg = f'started the game {game_name}'
             await BaseCommand.send_response(msg, message.channel)
             return
-        except:
+        except Exception as e:
             possible_game_names = game_tracker.GAMES_LIST
             msg = f'something was wrong with that command try using one of these games: ```' + ' '.join(possible_game_names) + '```'
             await BaseCommand.send_response(msg, message.channel)
+
+def _construct_game_moderator(game_name, guild, game_leader):
+    for g in BaseGame.__subclasses__():
+        if g.__name__.lower() == game_name:
+            return g(guild, game_leader)
