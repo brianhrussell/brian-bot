@@ -32,4 +32,4 @@ class Game(BaseCommand):
             msg = f'no game currently running in this server try starting one with {settings.COMMAND_PREFIX} startgame'
         else:
             msg = 'f'
-        await message.channel.send(msg)
+        await BaseCommand.send_response(msg, message.channel)

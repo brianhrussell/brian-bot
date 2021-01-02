@@ -1,4 +1,5 @@
 import games
+import game_tracker
 from commands.base_command  import BaseCommand
 from utils                  import get_emoji
 from random                 import randint
@@ -15,12 +16,11 @@ class ListGames(BaseCommand):
     # Override the handle() method
     # It will be called every time the command is received
     async def handle(self, params, message, client):
-        from game_tracker import GAME_LIST
-        msg = message.author.mention + "\n"
-
+        msg = 'Supported games:'
         # Displays all descriptions, sorted alphabetically by command name
-        for game in sorted(GAME_LIST.items()):
-            msg += "\n" + game[1].description
+        # TODO: add detail to game modules and print it here
+        for game in sorted(game_tracker.GAMES_LIST):
+            msg += "\n" + game
 
-        await message.channel.send(msg)
+        await BaseCommand.send_response(msg, message.channel)
     

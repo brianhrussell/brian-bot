@@ -32,15 +32,15 @@ class StartGame(BaseCommand):
             msg = f'there is already a game running in this server try again after it\'s over or\
                     ask the leader or a server admin to end it if it has been abandoned \
                     (brian hasn\'t implemented this yet so get fukt lol)'
-            await message.channel.send(msg)
+            await BaseCommand.send_response(msg, message.channel)
             return
         try:
             game_name = params[0]
             # start a game in the tracker and set the leader to this user
             msg = f'started the game {game_name}'
-            await message.channel.send(msg)
+            await BaseCommand.send_response(msg, message.channel)
             return
         except:
             possible_game_names = game_tracker.GAMES_LIST
             msg = f'something was wrong with that command try using one of these games: ```' + ' '.join(possible_game_names) + '```'
-            await message.channel.send(msg)
+            await BaseCommand.send_response(msg, message.channel)

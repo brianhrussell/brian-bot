@@ -18,4 +18,5 @@ class Commands(BaseCommand):
         for cmd in sorted(COMMAND_HANDLERS.items()):
             msg += "\n" + cmd[1].description
 
-        await message.channel.send(msg)
+        await BaseCommand.send_response(msg, message.channel)
+    

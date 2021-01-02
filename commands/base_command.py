@@ -19,3 +19,7 @@ class BaseCommand:
     # Every command must override this method
     async def handle(self, params, message, client):
         raise NotImplementedError  # To be defined by every command
+
+    @staticmethod
+    async def send_response(msg, channel):
+        await channel.send(msg)
