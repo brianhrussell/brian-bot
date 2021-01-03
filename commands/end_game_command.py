@@ -35,6 +35,7 @@ class EndGame(BaseCommand):
                 + f'```{ " ".join(possible_game_names) }```'
             await BaseCommand.send_response(msg, message.channel)
 
+
 def _construct_game_moderator(game_name, guild, game_leader):
     for g in BaseGame.__subclasses__():
         if g.__name__.lower() == game_name:

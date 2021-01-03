@@ -7,9 +7,9 @@ import message_handler
 import game_tracker
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from events.base_event              import BaseEvent
-from events                         import *
-from multiprocessing                import Process
+from events.base_event import BaseEvent
+from events import *
+from multiprocessing import Process
 
 # Set to remember if the bot is already running, since on_ready may be called
 # more than once on reconnects
@@ -31,7 +31,7 @@ def main():
     # on_ready may be called multiple times in the event of a reconnect,
     # hence the running flag
     @client.event
-    async def on_ready(): # pylint: disable=unused-variable
+    async def on_ready():  # pylint: disable=unused-variable
         if this.running:
             return
 
@@ -49,7 +49,7 @@ def main():
         n_ev = 0
         for ev in BaseEvent.__subclasses__():
             event = ev()
-            sched.add_job(event.run, 'interval', (client,), 
+            sched.add_job(event.run, 'interval', (client,),
                           minutes=event.interval_minutes)
             n_ev += 1
         sched.start()
@@ -64,18 +64,18 @@ def main():
         if text.startswith(settings.COMMAND_PREFIX) and text != settings.COMMAND_PREFIX:
             cmd_split = text[len(settings.COMMAND_PREFIX):].split()
             try:
-                await message_handler.handle_command(cmd_split[0].lower(), 
-                                      cmd_split[1:], message, client)
+                await message_handler.handle_command(cmd_split[0].lower(),
+                                                     cmd_split[1:], message, client)
             except:
                 print("Error while handling message", flush=True)
                 raise
 
     @client.event
-    async def on_message(message): # pylint: disable=unused-variable
+    async def on_message(message):  # pylint: disable=unused-variable
         await common_handle_message(message)
 
     @client.event
-    async def on_message_edit(before, after): # pylint: disable=unused-variable
+    async def on_message_edit(before, after):  # pylint: disable=unused-variable
         await common_handle_message(after)
 
     # Finally, set the bot running

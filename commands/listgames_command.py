@@ -1,9 +1,8 @@
 import games
 import game_tracker
-from commands.base_command  import BaseCommand
-from utils                  import get_emoji
-from random                 import randint
-
+from commands.base_command import BaseCommand
+from utils import get_emoji
+from random import randint
 
 
 class ListGames(BaseCommand):
@@ -23,4 +22,3 @@ class ListGames(BaseCommand):
             msg += "\n" + game
 
         await BaseCommand.send_response(msg, message.channel)
-    

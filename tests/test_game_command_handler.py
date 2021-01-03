@@ -10,6 +10,7 @@ import game_tracker                                 # pylint: disable=import-err
 
 _sent_messages = list()
 
+
 class TestGameCommandHandler(asynctest.TestCase):
 
     def setUp(self):
@@ -25,7 +26,7 @@ class TestGameCommandHandler(asynctest.TestCase):
             handler = Game()
             await handler.handle([], mock.Mock(name='message'), mock.Mock(name='client'))
             self.assertEqual(1, mock_send.call_count)
-    
+
     async def test_gamelist_command(self):
         with mock.patch('commands.base_command.BaseCommand.send_response') as mock_send:
             mock_send.side_effect = TestGameCommandHandler._printSentMessage
@@ -43,20 +44,20 @@ class TestGameCommandHandler(asynctest.TestCase):
             self.assertEqual(1, mock_send.call_count)
             self.assertTrue('something was wrong with' in _sent_messages[0])
 
-    async def test_startgame_ecamplegame_command_constructs_game(self):
+    async def test_startgame_examplegame_command_constructs_game(self):
         with mock.patch('commands.base_command.BaseCommand.send_response') as mock_send:
             mock_send.side_effect = TestGameCommandHandler._printSentMessage
             handler = StartGame()
 
             await handler.handle(['examplegame'], mock.Mock(name='message'), mock.Mock(name='client'))
-            
+
             self.assertEqual(1, mock_send.call_count)
             self.assertTrue('started the game examplegame' in _sent_messages)
             game_mapping = game_tracker.global_tracker.guild_mapping
             self.assertEqual(1, len(game_mapping))
             game = next(v for k, v in game_mapping.items())
             self.assertTrue(game.__class__.__name__ == 'ExampleGame')
-            
+
     @mock.patch('commands.base_command.BaseCommand.send_response')
     async def test_gamerunning_endgamecommand_removes_game(self, send_response_mock):
         send_response_mock.side_effect = TestGameCommandHandler._printSentMessage
@@ -65,7 +66,7 @@ class TestGameCommandHandler(asynctest.TestCase):
         client_mock = mock.Mock(name='client')
         handler = StartGame()
         await handler.handle(['examplegame'], message_mock, client_mock)
-        
+
         handler = EndGame()
         await handler.handle(['examplegame'], message_mock, client_mock)
         self.assertEqual(2, send_response_mock.call_count)
@@ -73,10 +74,10 @@ class TestGameCommandHandler(asynctest.TestCase):
         game_mapping = game_tracker.global_tracker.guild_mapping
         self.assertEqual(0, len(game_mapping))
 
-
     @staticmethod
     def _printSentMessage(msg, channel):
         _sent_messages.append(msg)
+
 
 if __name__ == "__main__":
     unittest.main()
