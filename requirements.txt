@@ -24,7 +24,7 @@ rope==0.18.0
 six==1.15.0
 toml==0.10.2
 typing-extensions==3.7.4.3
-tzlocal==2.1
+tzlocal==2.1s
 websockets==8.1
 wrapt==1.12.1
 yarl==1.6.3

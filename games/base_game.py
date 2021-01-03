@@ -9,4 +9,4 @@ class BaseGame:
         self.leader = user
         self.players = [user]
         self.phases = ['adding players']
-        self.name = "BaseGame"
+        self.name = type(self).__name__.lower()

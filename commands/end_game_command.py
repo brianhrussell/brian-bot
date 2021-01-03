@@ -7,7 +7,7 @@ from utils import get_emoji
 from commands.base_command import BaseCommand
 
 
-class StartGame(BaseCommand):
+class EndGame(BaseCommand):
 
     def __init__(self):
         description = 'Start a game.'
@@ -18,22 +18,18 @@ class StartGame(BaseCommand):
 
         guild = message.guild
 
-        if guild in game_tracker.global_tracker.guild_mapping:
-            msg = 'there is already a game running in this server try again after it\'s' \
-                + 'over or ask the leader or a server admin to end it if it has been' \
-                + 'abandoned (brian hasn\'t implemented this yet so get fukt lol)'
+        if guild not in game_tracker.global_tracker.guild_mapping:
+            msg = 'Couldn\'t find a game running in this server'
             await BaseCommand.send_response(msg, message.channel)
             return
         try:
-            game_name = params[0]
-            # start a game in the tracker and set the leader to this user
-            game_leader = message.author
-            game_moderator = _construct_game_moderator(game_name, guild, game_leader)
-            game_tracker.global_tracker.add_game(guild, game_moderator)
-            msg = f'started the game {game_name}'
+            # TODO only end if sent by leader or guild admin
+            # TODO add confirmation arg or something
+            removed_name = game_tracker.global_tracker.remove_game(guild)
+            msg = f'ended the game {removed_name}'
             await BaseCommand.send_response(msg, message.channel)
             return
-        except Exception: # TODO don't catch Exception
+        except Exception:
             possible_game_names = game_tracker.GAMES_LIST
             msg = 'something was wrong with that command try using one of these games:' \
                 + f'```{ " ".join(possible_game_names) }```'

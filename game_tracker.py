@@ -30,7 +30,10 @@ class GameTracker:
         if self.guild_mapping is None:
             return
         self.game_tracker_lock.acquire()
-        self.guild_mapping.pop(guild)
+        game = self.guild_mapping.pop(guild)
+        name = game.name
+        del(game)
         self.game_tracker_lock.release()
+        return name
 
 global_tracker = GameTracker()

@@ -29,7 +29,7 @@ class Game(BaseCommand):
         guild = message.guild
 
         if guild not in game_tracker.global_tracker.guild_mapping:
-            msg = f'no game currently running in this server try starting one with {settings.COMMAND_PREFIX} startgame'
+            msg = f'no game currently running in this server try starting one with {settings.COMMAND_PREFIX}startgame'
         else:
             msg = 'f'
         await BaseCommand.send_response(msg, message.channel)

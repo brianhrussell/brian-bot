@@ -1,10 +1,12 @@
 import unittest
 from unittest import mock
 import asynctest
-from commands.game_command import Game
-from commands.listgames_command import ListGames
-from commands.start_game_command import StartGame
-import game_tracker
+from commands.game_command import Game              # pylint: disable=import-error
+from commands.listgames_command import ListGames    # pylint: disable=import-error
+from commands.start_game_command import StartGame   # pylint: disable=import-error
+from commands.end_game_command import EndGame       # pylint: disable=import-error
+import game_tracker                                 # pylint: disable=import-error
+# TODO import these programatically or probably just split these tests into separate files
 
 _sent_messages = list()
 
@@ -50,6 +52,22 @@ class TestGameCommandHandler(asynctest.TestCase):
             game = next(v for k, v in game_mapping.items())
             self.assertTrue(game.__class__.__name__ == 'ExampleGame')
             
+    @mock.patch('commands.base_command.BaseCommand.send_response')
+    async def test_gamerunning_endgamecommand_removes_game(self, send_response_mock):
+        send_response_mock.side_effect = TestGameCommandHandler._printSentMessage
+        message_mock = mock.Mock(name='message')
+        message_mock.guild = 'mock_guild'
+        client_mock = mock.Mock(name='client')
+        handler = StartGame()
+        await handler.handle(['examplegame'], message_mock, client_mock)
+        
+        handler = EndGame()
+        await handler.handle(['examplegame'], message_mock, client_mock)
+        self.assertEqual(2, send_response_mock.call_count)
+        self.assertTrue('ended the game examplegame' in _sent_messages)
+        game_mapping = game_tracker.global_tracker.guild_mapping
+        self.assertEqual(0, len(game_mapping))
+
 
     @staticmethod
     def _printSentMessage(msg, channel):
