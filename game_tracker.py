@@ -1,6 +1,8 @@
-from games.base_game import BaseGame
-from games import *
 import threading
+from multiprocessing import Pool
+
+from games import *                     # pylint: disable=unused-wildcard-import
+from games.base_game import BaseGame
 
 # global tracking of the games that are build run in each guild. 
 # use as global singleton global_tracker

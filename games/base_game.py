@@ -8,5 +8,9 @@ class BaseGame:
         self.guild = guild
         self.leader = user
         self.players = [user]
-        self.phases = ['adding players']
+        self.states = ['adding players']
         self.name = type(self).__name__.lower()
+
+    # Every game must override this method
+    async def run(self, client):
+        raise NotImplementedError  # To be defined by every event

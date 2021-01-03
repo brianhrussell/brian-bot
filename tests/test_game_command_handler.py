@@ -11,11 +11,13 @@ import game_tracker                                 # pylint: disable=import-err
 _sent_messages = list()
 
 class TestGameCommandHandler(asynctest.TestCase):
+
     def setUp(self):
         _sent_messages = list()
 
     def tearDown(self):
         print('\n   >>>'.join(_sent_messages))
+        _sent_messages.clear()
 
     async def test_game_command(self):
         with mock.patch('commands.base_command.BaseCommand.send_response') as mock_send:
@@ -30,13 +32,16 @@ class TestGameCommandHandler(asynctest.TestCase):
             handler = ListGames()
             await handler.handle([], mock.Mock(name='message'), mock.Mock(name='client'))
             self.assertEqual(1, mock_send.call_count)
+            self.assertTrue('examplegame' in _sent_messages[0])
+            self.assertTrue('Supported games:' in _sent_messages[0])
 
-    async def test_startgame_command(self):
+    async def test_start_game_command_noargs_error_response(self):
         with mock.patch('commands.base_command.BaseCommand.send_response') as mock_send:
             mock_send.side_effect = TestGameCommandHandler._printSentMessage
             handler = StartGame()
             await handler.handle([], mock.Mock(name='message'), mock.Mock(name='client'))
             self.assertEqual(1, mock_send.call_count)
+            self.assertTrue('something was wrong with' in _sent_messages[0])
 
     async def test_startgame_ecamplegame_command_constructs_game(self):
         with mock.patch('commands.base_command.BaseCommand.send_response') as mock_send:
