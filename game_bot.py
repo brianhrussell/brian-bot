@@ -8,7 +8,7 @@ import game_tracker
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from events.base_event import BaseEvent
-from events import *
+from events import *  # pylint: disable=unused-wildcard-import
 from multiprocessing import Process
 
 # Set to remember if the bot is already running, since on_ready may be called
