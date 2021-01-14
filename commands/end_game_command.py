@@ -25,6 +25,8 @@ class EndGame(BaseCommand):
         try:
             # TODO only end if sent by leader or guild admin
             # TODO add confirmation arg or something
+            game = game_tracker.get_game_for_guild(guild)
+            game.end(client)
             removed_name = game_tracker.global_tracker.remove_game(guild)
             msg = f'ended the game {removed_name}'
             await BaseCommand.send_response(msg, message.channel)

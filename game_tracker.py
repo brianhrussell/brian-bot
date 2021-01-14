@@ -7,6 +7,7 @@ from games.base_game import BaseGame
 # global tracking of the games that are build run in each guild.
 # use as global singleton global_tracker
 # how to track dms? can do just context? or maybe dm response always have a canned id?
+# this is supposed to be a singleton more or less
 GAMES_LIST = [g.__name__.lower() for g in BaseGame.__subclasses__()]
 
 
@@ -40,5 +41,14 @@ class GameTracker:
         self.game_tracker_lock.release()
         return name
 
+    def remove_all_games(self):
+        self.game_tracker_lock.acquire()
+        self.guild_mapping.clear()
+        self.game_tracker_lock.release()
+
 
 global_tracker = GameTracker()
+
+
+def get_game_for_guild(guild):
+    return global_tracker.guild_mapping[guild]
