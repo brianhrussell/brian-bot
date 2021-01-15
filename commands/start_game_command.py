@@ -5,6 +5,7 @@ from games.base_game import BaseGame
 from utils import get_emoji
 
 from commands.base_command import BaseCommand
+from game_tracker import all_subclasses
 
 
 class StartGame(BaseCommand):
@@ -28,8 +29,7 @@ class StartGame(BaseCommand):
             game_name = params[0]
             # start a game in the tracker and set the leader to this user
             game_leader = message.author
-            game_moderator = _construct_game_moderator(
-                game_name, guild, game_leader)
+            game_moderator = _construct_game_moderator(game_name, guild, game_leader)
             game = game_tracker.global_tracker.add_game(guild, game_moderator)
             game.start(client)
             msg = f'started the game {game_name}'
@@ -43,6 +43,6 @@ class StartGame(BaseCommand):
 
 
 def _construct_game_moderator(game_name, guild, game_leader):
-    for g in BaseGame.__subclasses__():
+    for g in all_subclasses(BaseGame):
         if g.__name__.lower() == game_name:
             return g(guild, game_leader)

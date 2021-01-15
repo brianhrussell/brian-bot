@@ -4,11 +4,17 @@ from multiprocessing import Pool
 from games import *                     # pylint: disable=unused-wildcard-import
 from games.base_game import BaseGame
 
+
+def all_subclasses(cls):
+    return set(cls.__subclasses__()).union(
+        [s for c in cls.__subclasses__() for s in all_subclasses(c)])
+
+
 # global tracking of the games that are build run in each guild.
 # use as global singleton global_tracker
 # how to track dms? can do just context? or maybe dm response always have a canned id?
 # this is supposed to be a singleton more or less
-GAMES_LIST = [g.__name__.lower() for g in BaseGame.__subclasses__()]
+GAMES_LIST = [g.__name__.lower() for g in all_subclasses(BaseGame)]
 
 
 class GameTracker:
