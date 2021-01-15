@@ -8,4 +8,3 @@ class TwoRooms(JoinableGame):
 
     def available_commands(self):
         yield super().available_commands()
-        yield JoinableGame.join_command

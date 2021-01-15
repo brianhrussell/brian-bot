@@ -11,8 +11,7 @@ import game_tracker                                 # pylint: disable=import-err
 _sent_messages = list()
 
 
-class TestGameCommandHandler(asynctest.TestCase):
-
+class BotCommandTest(asynctest.TestCase):
     def setUp(self):
         _sent_messages = list()
 
@@ -21,54 +20,66 @@ class TestGameCommandHandler(asynctest.TestCase):
         _sent_messages.clear()
         game_tracker.global_tracker.remove_all_games()
 
-    async def test_game_command(self):
-        with mock.patch('commands.base_command.BaseCommand.send_response') as mock_send:
-            mock_send.side_effect = _printSentMessage
-            handler = Game()
-            await handler.handle([], mock.Mock(name='message'), mock.Mock(name='client'))
-            self.assertEqual(1, mock_send.call_count)
 
-    async def test_gamelist_command(self):
-        with mock.patch('commands.base_command.BaseCommand.send_response') as mock_send:
-            mock_send.side_effect = _printSentMessage
-            handler = ListGames()
-            await handler.handle([], mock.Mock(name='message'), mock.Mock(name='client'))
-            self.assertEqual(1, mock_send.call_count)
-            self.assertTrue('joinablegame' in _sent_messages[0])
-            self.assertTrue('Supported games:' in _sent_messages[0])
+class BasicGameCommandTests(BotCommandTest):
 
-    async def test_start_game_command_noargs_error_response(self):
-        with mock.patch('commands.base_command.BaseCommand.send_response') as mock_send:
-            mock_send.side_effect = _printSentMessage
-            handler = StartGame()
-            await handler.handle([], mock.Mock(name='message'), mock.Mock(name='client'))
-            self.assertEqual(1, mock_send.call_count)
-            self.assertTrue('something was wrong with' in _sent_messages[0])
+    @mock.patch('commands.base_command.BaseCommand.send_response')
+    async def test_game_command(self, send_response_mock):
+        send_response_mock.side_effect = _printSentMessage
+        handler = Game()
+        await handler.handle([], mock.Mock(name='message'), mock.Mock(name='client'))
+        self.assertEqual(1, send_response_mock.call_count)
 
-    async def test_startgame_joinablegame_command_constructs_game(self):
-        with mock.patch('commands.base_command.BaseCommand.send_response') as mock_send:
-            mock_send.side_effect = _printSentMessage
-            handler = StartGame()
+    @mock.patch('commands.base_command.BaseCommand.send_response')
+    async def test_joinablegamerunning_joincommand_joinsgame(self, send_response_mock):
+        send_response_mock.side_effect = _printSentMessage
+        message_mock, client_mock = await _start_game_with_mocks_async()
 
-            await handler.handle(['joinablegame'], mock.Mock(name='message'), mock.Mock(name='client'))
+        game_handler = Game()
+        await game_handler.handle(['join'], message_mock, client_mock)
 
-            self.assertEqual(1, mock_send.call_count)
-            self.assertTrue('started the game joinablegame' in _sent_messages)
-            game_mapping = game_tracker.global_tracker.guild_mapping
-            self.assertEqual(1, len(game_mapping))
-            game = next(v for k, v in game_mapping.items())
-            self.assertTrue(game.__class__.__name__ == 'JoinableGame')
+        self.assertEqual(2, send_response_mock.call_count)
+        self.assertTrue('added <Mock' in _sent_messages[1])
 
-    async def test_joinablegamerunning_joincommand_joinsgame(self):
-        with mock.patch('commands.base_command.BaseCommand.send_response') as mock_send:
-            mock_send.side_effect = _printSentMessage
-            message_mock, client_mock = await _start_game_with_mocks_async()
 
-            game_handler = Game()
-            await game_handler.handle(['join'], message_mock, client_mock)
+class ListGamesCommandTests(BotCommandTest):
 
-            self.assertEqual(2, mock_send.call_count)
-            self.assertTrue('added <Mock' in _sent_messages[1])
+    @mock.patch('commands.base_command.BaseCommand.send_response')
+    async def test_gamelist_command(self, send_response_mock):
+        send_response_mock.side_effect = _printSentMessage
+        handler = ListGames()
+        await handler.handle([], mock.Mock(name='message'), mock.Mock(name='client'))
+        self.assertEqual(1, send_response_mock.call_count)
+        self.assertTrue('joinablegame' in _sent_messages[0])
+        self.assertTrue('Supported games:' in _sent_messages[0])
+
+
+class StartGameCommandTests(BotCommandTest):
+
+    @mock.patch('commands.base_command.BaseCommand.send_response')
+    async def test_start_game_command_noargs_error_response(self, send_response_mock):
+        send_response_mock.side_effect = _printSentMessage
+        handler = StartGame()
+        await handler.handle([], mock.Mock(name='message'), mock.Mock(name='client'))
+        self.assertEqual(1, send_response_mock.call_count)
+        self.assertTrue('something was wrong with' in _sent_messages[0])
+
+    @mock.patch('commands.base_command.BaseCommand.send_response')
+    async def test_startgame_joinablegame_command_constructs_game(self, send_response_mock):
+        send_response_mock.side_effect = _printSentMessage
+        handler = StartGame()
+
+        await handler.handle(['joinablegame'], mock.Mock(name='message'), mock.Mock(name='client'))
+
+        self.assertEqual(1, send_response_mock.call_count)
+        self.assertTrue('started the game joinablegame' in _sent_messages)
+        game_mapping = game_tracker.global_tracker.guild_mapping
+        self.assertEqual(1, len(game_mapping))
+        game = next(v for k, v in game_mapping.items())
+        self.assertTrue(game.__class__.__name__ == 'JoinableGame')
+
+
+class EndGameCommandTests(BotCommandTest):
 
     @mock.patch('commands.base_command.BaseCommand.send_response')
     async def test_gamerunning_endgamecommand_removes_game(self, send_response_mock):
