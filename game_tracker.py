@@ -42,6 +42,9 @@ class GameTracker:
             return
         self.game_tracker_lock.acquire()
         game = self.guild_mapping.pop(guild)
+        if game is None:
+            self.game_tracker_lock.release()
+            return 'ghost game'
         name = game.name
         del(game)
         self.game_tracker_lock.release()
