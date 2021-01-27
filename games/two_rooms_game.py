@@ -79,7 +79,7 @@ class TwoRooms(JoinableGame):
         return '\n\n'.join(lines)
 
     def clear_roles(self, params, message, client):
-        raise NotImplementedError
+        self.role_manager.clear_roles()
 
     def selected_roles(self, params, message, client):
         raise NotImplementedError

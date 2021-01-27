@@ -1,3 +1,6 @@
+from threading import Lock
+
+
 from games.two_rooms.roles.role_utils import BaseRole
 from games.two_rooms.roles import *  # pylint: disable=unused-wildcard-import
 
@@ -18,21 +21,28 @@ class RoleManager:
         self.role_factory = ROLE_FACTORY
         self.unassigned_roles = list()
         self.players = list()
+        self.lock = Lock()
 
     def add_role(self, role):
-        new_role = self.role_factory[role]()
-        if new_role.max_role_count == 0:
-            self.unassigned_roles.append(new_role)
-            return
-        count = sum(1 for i in self.unassigned_roles if i.name == new_role.name)
-        if count <= new_role.max_role_count:
-            self.unassigned_roles.append(new_role)
+        with self.lock:
+            new_role = self.role_factory[role]()
+            if new_role.max_role_count == 0:
+                self.unassigned_roles.append(new_role)
+                return
+            count = sum(1 for i in self.unassigned_roles if i.name == new_role.name)
+            if count <= new_role.max_role_count:
+                self.unassigned_roles.append(new_role)
 
     def remove_role(self, role):
-        role_to_delete = None
-        for r in self.unassigned_roles:
-            if r.name.lower() == role.lower():
-                role_to_delete = r
-                break
-        if role_to_delete is not None:
-            self.unassigned_roles.remove(role_to_delete)
+        with self.lock:
+            role_to_delete = None
+            for r in self.unassigned_roles:
+                if r.name.lower() == role.lower():
+                    role_to_delete = r
+                    break
+            if role_to_delete is not None:
+                self.unassigned_roles.remove(role_to_delete)
+
+    def clear_roles(self):
+        with self.lock:
+            self.unassigned_roles.clear()
