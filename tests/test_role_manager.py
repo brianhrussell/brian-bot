@@ -8,7 +8,7 @@ class TwoRoomsRoleManagerTest(unittest.TestCase):
 
     def test_available_roles_finds_roles(self):
         manager = RoleManager()
-        self.assertEqual(len(manager.role_factory), 4)
+        self.assertEqual(len(manager.role_factory), 6)
 
 
 if __name__ == "__main__":

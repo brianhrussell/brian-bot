@@ -6,5 +6,5 @@ from os.path import dirname, basename
 
 __all__ = list()
 for f in listdir(dirname(__file__)):
-    if f[-8:] == "_role.py" and not f.endswith("__init__.py"):
+    if f[-3:] == '.py' and not f.endswith('__init__.py'):
         __all__.append(basename(f)[:-3])

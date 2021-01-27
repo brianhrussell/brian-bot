@@ -4,17 +4,16 @@ from utils import get_emoji
 
 class BaseRole:
 
-    def __init__(self):
-        self.color = CardColor.GREY
-        self.team = TeamColor.GREY
-        self.max_role_count = 0
-        self.allows_buried_role = False
-        self.name = "Base Role"
-        self.directions = "This role shouldn't show up in the list."
-        self.modifiers = list()
-        self.required_roles = ['Bomb', 'President']
+    def __init__(self, name, directions, color, team, max_role_count, allows_buried_role, required_roles, modifiers):
+        self.name = name
+        self.directions = directions
+        self.color = color
+        self.team = team
+        self.max_role_count = max_role_count
+        self.allows_buried_role = allows_buried_role
+        self.required_roles = required_roles
+        self.modifiers = modifiers
 
-# can probably do this programatically but probably not worth bothering
     def color_string(self):
         if self.color == CardColor.GREY:
             return get_emoji('white_square')
