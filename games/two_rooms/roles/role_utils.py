@@ -11,6 +11,7 @@ class BaseRole:
         self.name = "Base Role"
         self.directions = "This role shouldn't show up in the list."
         self.modifiers = list()
+        self.required_roles = ['Bomb', 'President']
 
 
 class CardColor(Enum):
