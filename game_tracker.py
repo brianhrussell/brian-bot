@@ -16,44 +16,41 @@ def all_subclasses(cls):
 # this is supposed to be a singleton more or less
 GAMES_LIST = [g.__name__.lower() for g in all_subclasses(BaseGame)]
 
+global_tracker_lock = threading.Lock()
 
 class GameTracker:
 
     def __init__(self):
         self.supported_games = GAMES_LIST
-        self.game_tracker_lock = threading.Lock()
+        self.game_tracker_lock = global_tracker_lock
         self.guild_mapping = dict()
 
     def ensure_mapping_exists(self):
-        self.game_tracker_lock.acquire()
-        if self.guild_mapping is None:
-            self.guild_mapping = dict()
-        self.game_tracker_lock.release()
+        with self.game_tracker_lock:
+            if self.guild_mapping is None:
+                self.guild_mapping = dict()
 
     def add_game(self, guild, game):
         self.ensure_mapping_exists()
-        self.game_tracker_lock.acquire()
-        self.guild_mapping[guild] = game
-        self.game_tracker_lock.release()
+        with self.game_tracker_lock:
+            self.guild_mapping[guild] = game
         return game
 
     def remove_game(self, guild):
         if self.guild_mapping is None:
             return
-        self.game_tracker_lock.acquire()
-        game = self.guild_mapping.pop(guild)
-        if game is None:
-            self.game_tracker_lock.release()
-            return 'ghost game'
-        name = game.name
-        del(game)
-        self.game_tracker_lock.release()
+        with self.game_tracker_lock:
+            game = self.guild_mapping.pop(guild)
+            if game is None:
+                self.game_tracker_lock.release()
+                return 'ghost game'
+            name = game.name
+            del(game)
         return name
 
     def remove_all_games(self):
-        self.game_tracker_lock.acquire()
-        self.guild_mapping.clear()
-        self.game_tracker_lock.release()
+        with self.game_tracker_lock:
+            self.guild_mapping.clear()
 
 
 global_tracker = GameTracker()
