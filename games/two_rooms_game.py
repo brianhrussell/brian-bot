@@ -1,8 +1,7 @@
 from games.joinable_game import JoinableGame
 from games.joinable_game import GameCommand
-
 from enum import Enum
-
+import games.two_rooms.players
 """
 ok so this is where all the game rules start
 we may need to start breaking out more classes because
