@@ -1,0 +1,12 @@
+what will a role need to have?
+
+readable name
+readable directions
+card color
+id*
+whether it allows for a buried card
+an expression describing when that role wins
+list of modifiers card may have shy gulliable etc.
+
+
+*can be generated at runtime?

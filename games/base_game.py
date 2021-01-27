@@ -33,7 +33,7 @@ class BaseGame:
 
 class GameCommand():
 
-    def __init__(self, command, description, func):
+    def __init__(self, command, func, description):
         self.command = command
-        self.description = description
         self.func = func
+        self.description = description
