@@ -49,5 +49,24 @@ class RoleTracker:
                 selected_roles.append(role_name + f' x{count}')
         return '\n'.join(selected_roles)
 
-    def roles_are_valid(self):
-        return False
+    def roles_are_valid(self, num_players):
+        roles_in_set = len(self.unassigned_roles)
+        if roles_in_set < num_players:
+            return False
+        any_roles_allow_buried_card = False
+        for role in self.unassigned_roles:
+            if role.allows_buried_role:
+                any_roles_allow_buried_card = True
+            if not self.required_roles_are_met(role):
+                return False
+
+        # TODO implement requires bury card
+        if any_roles_allow_buried_card:
+            return roles_in_set - 1 <= num_players
+        return roles_in_set == num_players
+
+    def required_roles_are_met(self, role):
+        for required_role in role.required_roles:
+            if not any(r.name.lower() == required_role.lower() for r in self.unassigned_roles):
+                return False
+        return True

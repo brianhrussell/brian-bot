@@ -86,6 +86,19 @@ class TwoRoomsGameTests(test_helpers.BotCommandTest):
         self.assertEqual(4, send_response_mock.call_count)
         self.assertTrue('selected roles:\npresident x1\nbomb x1' in test_helpers.sent_messages[3])
 
+    @mock.patch('commands.base_command.BaseCommand.send_response')
+    async def test_tworoomsgamewithtworoles_begingame_rolesarenotvalid(self, send_response_mock):
+        send_response_mock.side_effect = test_helpers.printSentMessage
+        message_mock, client_mock = await test_helpers.start_game_with_mocks_async('tworooms')
+
+        game_handler = Game()
+        await game_handler.handle(['add-role', 'Bomb'], message_mock, client_mock)
+        await game_handler.handle(['add-role', 'President'], message_mock, client_mock)
+        await game_handler.handle(['begin'], message_mock, client_mock)
+
+        self.assertEqual(4, send_response_mock.call_count)
+        self.assertTrue('the selected roles are not valid' in test_helpers.sent_messages[3])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -88,7 +88,10 @@ class TwoRooms(JoinableGame):
 
     def begin_game(self, params, message, client):
         player_id = message.author.id
-        if not self.role_tracker.roles_are_valid():
+        num_players = len(self.players)
+        if num_players < 4:
+            return 'you need more people to play'
+        if not self.role_tracker.roles_are_valid(num_players):
             return "the selected roles are not valid sorry," + \
                 " you'll have to figure out why on your own. selected roles: TODO print selected roles"
         if player_id == self.leader.id:
