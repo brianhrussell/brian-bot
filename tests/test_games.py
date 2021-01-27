@@ -97,7 +97,7 @@ class TwoRoomsGameTests(test_helpers.BotCommandTest):
         await game_handler.handle(['begin'], message_mock, client_mock)
 
         self.assertEqual(4, send_response_mock.call_count)
-        self.assertTrue('the selected roles are not valid' in test_helpers.sent_messages[3])
+        self.assertTrue('you need more people to play' in test_helpers.sent_messages[3])
 
 
 if __name__ == "__main__":

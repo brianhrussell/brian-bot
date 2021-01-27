@@ -1,7 +1,6 @@
 from games.joinable_game import JoinableGame
 from games.joinable_game import GameCommand
 from games.two_rooms.role_tracker import RoleTracker
-
 from enum import Enum
 """
 ok so this is where all the game rules start
@@ -12,7 +11,7 @@ My idea here is to have a json file with all the possible cards and a class
 that parses that json and knows how ea  ch of the cards interact?
     So this class will just handle which state of the game are we in
     and possibly the room leadership?
-    
+
 It can ask the RuleBook or RoleNegotiator orv whatever i end up calling it
 what cards exist then offering those all as options to add. When two players share
 cards or a role uses their power this class will ask the rule class what the consequences
@@ -51,7 +50,8 @@ class TwoRooms(JoinableGame):
         # return true
 
     def assign_roles(self):
-        raise NotImplementedError
+        for player in self.players:
+            self.role_tracker.deal_role(player)
 
     def add_role(self, params, message, client):
         if len(params) == 0:
@@ -93,6 +93,7 @@ class TwoRooms(JoinableGame):
             return 'you need more people to play'
         if not self.role_tracker.roles_are_valid(num_players):
             return "the selected roles are not valid sorry," + \
-                " you'll have to figure out why on your own. selected roles: TODO print selected roles"
+                " you'll have to figure out why on your own. selected roles:\n" + \
+                self.role_tracker.get_selected_role_names()
         if player_id == self.leader.id:
             self.assign_roles()

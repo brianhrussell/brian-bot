@@ -3,6 +3,7 @@ from threading import Lock
 
 from games.two_rooms.roles.role_utils import BaseRole
 from games.two_rooms.roles import *  # pylint: disable=unused-wildcard-import
+from random import randrange
 
 # Register all available roles. omit the word role from their name to save user input
 ROLE_FACTORY = {c.__name__.lower()[:-4]: c
@@ -70,3 +71,10 @@ class RoleTracker:
             if not any(r.name.lower() == required_role.lower() for r in self.unassigned_roles):
                 return False
         return True
+
+    def deal_role(self, player):
+        num_roles = len(self.unassigned_roles)
+        rand_int = randrange(0, num_roles)
+        dealt_role = self.unassigned_roles[rand_int]
+        player.role = dealt_role
+        self.unassigned_roles.remove(dealt_role)
