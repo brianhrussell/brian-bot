@@ -1,9 +1,9 @@
 from games.two_rooms.roles.role_utils import BaseRole
-from games.two_rooms.roles import *
+from games.two_rooms.roles import *  # pylint: disable=unused-wildcard-import
 
 # Register all available roles
-AVAILABLE_ROLES = {c.__name__.lower(): c()
-                   for c in BaseRole.__subclasses__()}
+ROLE_FACTORY = {c.__name__.lower(): c
+                for c in BaseRole.__subclasses__()}
 
 
 class Player:
@@ -14,6 +14,6 @@ class Player:
 
 class RoleManager:
     def __init__(self):
-        self.available_roles = AVAILABLE_ROLES
+        self.role_factory = ROLE_FACTORY
         self.unassigned_roles = list()
         self.players = list()

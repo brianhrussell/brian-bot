@@ -1,8 +1,8 @@
-from commands.base_command  import BaseCommand
+from commands.base_command import BaseCommand
 import game_tracker
-# This, in addition to tweaking __all__ on commands/__init__.py, 
+# This, in addition to tweaking __all__ on commands/__init__.py,
 # imports all classes inside the commands package.
-from commands               import *
+from commands import *  # pylint: disable=unused-wildcard-import
 
 import settings
 
@@ -15,12 +15,12 @@ COMMAND_HANDLERS = {c.__name__.lower(): c()
 
 async def handle_command(command, args, message, bot_client):
     # Check whether the command is supported, stop silently if it's not
-    # (to prevent unnecesary spam if our bot shares the same command prefix 
+    # (to prevent unnecesary spam if our bot shares the same command prefix
     # with some other bot)
     if command not in COMMAND_HANDLERS:
         return
 
-    print(f"{message.author.name}: {settings.COMMAND_PREFIX}{command} " 
+    print(f"{message.author.name}: {settings.COMMAND_PREFIX}{command} "
           + " ".join(args))
 
     # Retrieve the command
