@@ -17,16 +17,21 @@ class EndGame(BaseCommand):
     async def handle(self, params, message, client):
 
         guild = message.guild
-
+        author = message.author
         if guild not in game_tracker.global_tracker.guild_mapping:
             msg = 'Couldn\'t find a game running in this server'
             await BaseCommand.send_response(msg, message.channel)
             return
         try:
-            # TODO only end if sent by leader or guild admin
             # TODO add confirmation arg or something
             game = game_tracker.get_game_for_guild(guild)
+            if author.id != game.leader.id and not _user_is_admin(author):
+                msg = f'you do not have persmission to end this game. ask the leader of the game or a server Administrator'
+                await BaseCommand.send_response(msg, message.channel)
+                return
+
             game.end(client)
+
             removed_name = game_tracker.global_tracker.remove_game(guild)
             msg = f'ended the game {removed_name}'
             await BaseCommand.send_response(msg, message.channel)
@@ -36,6 +41,10 @@ class EndGame(BaseCommand):
             msg = 'something was wrong with that command try using one of these games:' \
                 + f'```{ " ".join(possible_game_names) }```'
             await BaseCommand.send_response(msg, message.channel)
+
+
+def _user_is_admin(user):
+    return user.guild_permissions.administrator
 
 
 def _construct_game_moderator(game_name, guild, game_leader):

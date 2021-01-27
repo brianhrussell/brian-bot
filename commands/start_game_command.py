@@ -21,8 +21,7 @@ class StartGame(BaseCommand):
 
         if guild in game_tracker.global_tracker.guild_mapping:
             msg = 'there is already a game running in this server try again after it\'s' \
-                + 'over or ask the leader or a server admin to end it if it has been' \
-                + 'abandoned (brian hasn\'t implemented this yet so get fukt lol)'
+                + 'over or ask the leader or a server admin to end it if it has been abandoned'
             await BaseCommand.send_response(msg, message.channel)
             return
         try:
@@ -46,3 +45,4 @@ def _construct_game_moderator(game_name, guild, game_leader):
     for g in all_subclasses(BaseGame):
         if g.__name__.lower() == game_name:
             return g(guild, game_leader)
+    raise 'game not found'
