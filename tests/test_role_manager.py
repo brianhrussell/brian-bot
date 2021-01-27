@@ -1,13 +1,13 @@
-from games.two_rooms.players import RoleManager
+from games.two_rooms.role_tracker import RoleTracker
 
 import unittest
 from unittest import mock
 
 
-class TwoRoomsRoleManagerTest(unittest.TestCase):
+class TwoRoomsRoleTrackerTest(unittest.TestCase):
 
     def test_available_roles_finds_roles(self):
-        manager = RoleManager()
+        manager = RoleTracker()
         self.assertEqual(len(manager.role_factory), 6)
 
 

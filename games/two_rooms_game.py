@@ -1,6 +1,6 @@
 from games.joinable_game import JoinableGame
 from games.joinable_game import GameCommand
-from games.two_rooms.players import RoleManager
+from games.two_rooms.role_tracker import RoleTracker
 
 from enum import Enum
 """
@@ -33,7 +33,7 @@ class TwoRooms(JoinableGame):
         super().__init__(guild, user)
         self.players = dict()
         self.state = TwoRooms.TwoRoomsState.SETUP
-        self.role_manager = RoleManager()
+        self.role_tracker = RoleTracker()
 
     # TODO this is so sus just make the available_commands() for each game static right?
     def available_commands(self):
@@ -57,36 +57,38 @@ class TwoRooms(JoinableGame):
         if len(params) == 0:
             return 'provide a role name to add try using `!game list-roles`'
         for param in params:
-            if param.lower() not in self.role_manager.role_factory:
+            if param.lower() not in self.role_tracker.role_factory:
                 return f'{param} is not a valid role. use  `!game list-roles` to see a list of available roles.'
-            self.role_manager.add_role(param.lower())
-            return f'added roles successfully. current play set size: {len(self.role_manager.unassigned_roles)}'
+            self.role_tracker.add_role(param.lower())
+            return f'added roles successfully. current play set size: {len(self.role_tracker.unassigned_roles)}'
 
     def remove_role(self, params, message, client):
         if len(params) == 0:
             return 'provide a role name to remove try using `!game list-roles` or clear all roles with `!game clear-roles`'
         for param in params:
-            if param.lower() not in self.role_manager.role_factory:
+            if param.lower() not in self.role_tracker.role_factory:
                 return f'{param} is not a valid role. use  `!game list-roles` to see a list of available roles.'
-            self.role_manager.remove_role(param.lower())
+            self.role_tracker.remove_role(param.lower())
             return 'removed roles successfully'
 
     def list_roles(self, params, message, client):
         lines = list()
-        for role_name in self.role_manager.role_factory:
-            role = self.role_manager.role_factory[role_name]()
+        for role_name in self.role_tracker.role_factory:
+            role = self.role_tracker.role_factory[role_name]()
             lines.append(role.to_string())
         return '\n\n'.join(lines)
 
     def clear_roles(self, params, message, client):
-        self.role_manager.clear_roles()
+        self.role_tracker.clear_roles()
+        return 'play set cleared'
 
     def selected_roles(self, params, message, client):
-        raise NotImplementedError
+        roles = self.role_tracker.get_selected_role_names()
+        return 'selected roles:\n' + roles
 
     def begin_game(self, params, message, client):
         player_id = message.author.id
-        if not self.selected_roles_are_valid():
+        if not self.role_tracker.roles_are_valid():
             return "the selected roles are not valid sorry," + \
                 " you'll have to figure out why on your own. selected roles: TODO print selected roles"
         if player_id == self.leader.id:
