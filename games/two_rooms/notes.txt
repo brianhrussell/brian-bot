@@ -1,3 +1,9 @@
+next thing to work on:
+assign roles to players randomly
+assign players to rooms randomly
+associate channels with rooms and be able to modify perms
+
+
 what will a role need to have?
 
 readable name
