@@ -103,17 +103,27 @@ class TwoRoomsGameTests(test_helpers.BotCommandTest):
 
 class RoomTests(unittest.TestCase):
     def test_assign_players_to_rooms(self):
-        for case in [2, 4, 7, 11, 31]:
+        for case in [2, 4, 7, 10, 31]:
             tworooms = TwoRooms(mock.Mock(), mock.Mock())
             tworooms.players = self.generate_room_with_players(case)
             tworooms.assign_rooms()
             self.assert_rooms_are_valid(tworooms)
 
+    def test_assign_leaders_randomly(self):
+        for case in [2, 4, 7, 10, 31]:
+            tworooms = TwoRooms(mock.Mock(), mock.Mock())
+            tworooms.players = self.generate_room_with_players(case)
+            tworooms.assign_rooms()
+            tworooms.assign_leaders_randomly()
+            self.assert_rooms_are_valid(tworooms)
+            self.assertTrue(tworooms.rooms[0].leader in tworooms.rooms[0].players)
+            self.assertTrue(tworooms.rooms[1].leader in tworooms.rooms[1].players)
+
     @staticmethod
     def generate_room_with_players(num_players):
         d = dict()
         for i in range(num_players):
-            d[i] = i
+            d[i] = mock.Mock()
         return d
 
     def assert_rooms_are_valid(self, tworooms):

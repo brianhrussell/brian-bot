@@ -6,7 +6,7 @@ from math import floor, ceil
 from random import randrange
 from enum import Enum
 from random import choice
-
+from discord import Forbidden
 """
 ok so this is where all the game rules start
 we may need to start breaking out more classes because
@@ -29,7 +29,7 @@ Then, possible
 
 class TwoRoomsState(Enum):
     SETUP = 0
-    ON_BEGIN = 1
+    PLAYING = 1
 
 
 class TwoRooms(JoinableGame):
@@ -40,8 +40,10 @@ class TwoRooms(JoinableGame):
         self.state = TwoRoomsState.SETUP
         self.role_tracker = RoleTracker()
         self.rooms = [Room(), Room()]
+        self.round = 0
 
     # TODO this is so sus just make the available_commands() for each game static right?
+
     def available_commands(self):
         for command in super().available_commands():
             yield command
@@ -65,9 +67,15 @@ class TwoRooms(JoinableGame):
         room_one_slots = floor(num_players / 2)
         while room_one_slots > 0:
             rand_index = randrange(0, room_one_slots)
-            self.rooms[0].players.append(unassigned_players.pop(rand_index))
+            self.rooms[0].add_player(unassigned_players.pop(rand_index))
             room_one_slots = room_one_slots - 1
-        self.rooms[1].players = unassigned_players
+        for player in unassigned_players:
+            self.rooms[1].add_player(player)
+
+    def assign_leaders_randomly(self):
+        for room in self.rooms:
+            room_size = len(room.players)
+            room.leader = room.players[randrange(0, room_size)]
 
     # COMMAND HANDLERS
     def set_room_roles(self, params, message, client):
@@ -138,5 +146,11 @@ class TwoRooms(JoinableGame):
             return 'you need to set a role for each room. use `!game room-roles @role1 @role2`'
         if player_id != self.leader.id:
             return 'only the leader can start the game'
-        self.assign_roles()
-        self.assign_rooms()
+        try:
+            self.assign_roles()
+            self.assign_rooms()
+            self.state = TwoRoomsState.PLAYING
+            self.round = 1
+            self.assign_leaders_randomly()
+        except Forbidden as e:
+            return f'the bot is missing the permissions it needs message: {e}'
