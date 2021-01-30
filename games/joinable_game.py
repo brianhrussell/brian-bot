@@ -15,7 +15,7 @@ class JoinableGame(BaseGame):
 
     def __init__(self, guild, user):
         super().__init__(guild, user)
-        self.players = dict()
+        self.joined_users = dict()
         self.state = self.JoinableGameState.SETUP  # to be overwritten but subclasses with actual state enums
 
     # TODO this should probably be higher in the class hierarchy
@@ -39,10 +39,10 @@ class JoinableGame(BaseGame):
             return "game has already started, we can't add you"
         player_id = message.author.id
         player = message.author
-        if player_id in self.players:
+        if player_id in self.joined_users:
             # TODO test this >_>
             return f'{player} has already joined.'
-        self.players[player_id] = player
+        self.joined_users[player_id] = player
         return(f'added {player} to the game.')
 
     join_command = GameCommand('join', join_game, 'join a game in progress')

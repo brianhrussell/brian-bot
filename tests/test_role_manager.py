@@ -50,9 +50,8 @@ class TwoRoomsRoleTrackerTest(unittest.TestCase):
     def deal_roles(self, tracker, num_players):
         player_mocks = list()
         for i in range(0, num_players):
-            player_mock = mock.Mock()
-            tracker.deal_role(player_mock)
-            player_mocks.append(player_mock)
+            user_mock = mock.Mock()
+            player_mocks.append(tracker.deal_role(user_mock))
         return player_mocks
 
     def add_roles(self, tracker, role_names):

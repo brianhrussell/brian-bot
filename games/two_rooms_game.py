@@ -46,8 +46,8 @@ class TwoRooms(JoinableGame):
         yield GameCommand('selected-roles', TwoRooms.selected_roles, 'display the roles in the current play set')
 
     def assign_roles(self):
-        for player in self.players:
-            self.role_tracker.deal_role(player)
+        for user in self.joined_users:
+            self.players[user] = self.role_tracker.deal_role(user)
 
     def add_role(self, params, message, client):
         if len(params) == 0:
@@ -84,7 +84,7 @@ class TwoRooms(JoinableGame):
 
     def begin_game(self, params, message, client):
         player_id = message.author.id
-        num_players = len(self.players)
+        num_players = len(self.joined_users)
         if num_players < 4:
             return 'you need more people to play'
         if not self.role_tracker.roles_are_valid(num_players):
