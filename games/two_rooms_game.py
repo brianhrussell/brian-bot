@@ -1,7 +1,12 @@
 from games.joinable_game import JoinableGame
 from games.joinable_game import GameCommand
 from games.two_rooms.role_tracker import RoleTracker
+from games.two_rooms.room import Room
+from math import floor, ceil
+from random import randrange
 from enum import Enum
+from random import choice
+
 """
 ok so this is where all the game rules start
 we may need to start breaking out more classes because
@@ -30,9 +35,10 @@ class TwoRooms(JoinableGame):
 
     def __init__(self, guild, user):
         super().__init__(guild, user)
-        self.players = dict()
+        self.players = dict()  # dict of discord_user : tworooms.player.Player
         self.state = TwoRooms.TwoRoomsState.SETUP
         self.role_tracker = RoleTracker()
+        self.rooms = [Room(), Room()]
 
     # TODO this is so sus just make the available_commands() for each game static right?
     def available_commands(self):
@@ -48,6 +54,18 @@ class TwoRooms(JoinableGame):
     def assign_roles(self):
         for user in self.joined_users:
             self.players[user] = self.role_tracker.deal_role(user)
+
+    def assign_rooms(self):
+        unassigned_players = list()
+        for player in self.players.values():
+            unassigned_players.append(player)
+        num_players = len(unassigned_players)
+        room_one_slots = floor(num_players / 2)
+        while room_one_slots > 0:
+            rand_index = randrange(0, room_one_slots)
+            self.rooms[0].players.append(unassigned_players.pop(rand_index))
+            room_one_slots = room_one_slots - 1
+        self.rooms[1].players = unassigned_players
 
     def add_role(self, params, message, client):
         if len(params) == 0:
@@ -93,3 +111,4 @@ class TwoRooms(JoinableGame):
                 self.role_tracker.get_selected_role_names()
         if player_id == self.leader.id:
             self.assign_roles()
+            self.assign_rooms()

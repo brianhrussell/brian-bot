@@ -6,6 +6,7 @@ import test_helpers
 from commands.game_command import Game              # pylint: disable=import-error
 from commands.start_game_command import StartGame   # pylint: disable=import-error
 from game_tracker import get_game_for_guild
+from games.two_rooms_game import TwoRooms
 
 
 class TwoRoomsGameTests(test_helpers.BotCommandTest):
@@ -98,6 +99,26 @@ class TwoRoomsGameTests(test_helpers.BotCommandTest):
 
         self.assertEqual(4, send_response_mock.call_count)
         self.assertTrue('you need more people to play' in test_helpers.sent_messages[3])
+
+
+class RoomTests(unittest.TestCase):
+    def test_assign_players_to_rooms(self):
+        for case in [2, 4, 7, 11, 31]:
+            tworooms = TwoRooms(mock.Mock(), mock.Mock())
+            tworooms.players = self.generate_room_with_players(case)
+            tworooms.assign_rooms()
+            self.assert_rooms_are_valid(tworooms)
+
+    @staticmethod
+    def generate_room_with_players(num_players):
+        d = dict()
+        for i in range(num_players):
+            d[i] = i
+        return d
+
+    def assert_rooms_are_valid(self, tworooms):
+        for player in tworooms.players.values():
+            self.assertTrue((player in tworooms.rooms[0].players) ^ (player in tworooms.rooms[1].players))
 
 
 if __name__ == "__main__":

@@ -49,7 +49,7 @@ class TwoRoomsRoleTrackerTest(unittest.TestCase):
 
     def deal_roles(self, tracker, num_players):
         player_mocks = list()
-        for i in range(0, num_players):
+        for i in range(0, num_players):  # pylint: disable=unused-variable
             user_mock = mock.Mock()
             player_mocks.append(tracker.deal_role(user_mock))
         return player_mocks
