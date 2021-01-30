@@ -1,7 +1,14 @@
-next thing to work on:
-assign roles to players randomly
+TODOS:
 assign players to rooms randomly
 associate channels with rooms and be able to modify perms
+capture round count info on LEADER CARD
+figure out how to handle private reveal like agent
+
+TwoRoomsGame
+- handles messages from discord
+- move game state to a separate class that side effects of messages?
+
+where does seomthing like rooms, tracking which players have interacted, adn the logic of players sharing cards go?
 
 
 what will a role need to have?
@@ -12,7 +19,22 @@ card color
 id*
 whether it allows for a buried card
 an expression describing when that role wins
-list of modifiers card may have shy gulliable etc.
+list of conditions card may:
+    shy, immune, ambassador(?), blind(?should we even include this?), dead, coy, foolish, in love/hate with $player
+    liar/truther(not that bot can enforce)
 
 
 *can be generated at runtime?
+
+
+chanel message for role share req would be like
+@sendee @sender has requested to share role do you want to accept?
+@sendee click checkmark to accept @sender click x to cancel
+
+on_reaction_add index into a message dict with the message id the reaction was added to
+if it's in our request dict and the adder clicked an appropriate box and we are in a state where that action is valid
+affect that change.
+remove all reactions to that message as soon as somebody clicks one of them and remove that message from the queue
+
+
+if the player has some modifier such as shy or leprechaun that affects this interaction still send the message as normal

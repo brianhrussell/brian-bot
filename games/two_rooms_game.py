@@ -45,10 +45,6 @@ class TwoRooms(JoinableGame):
         yield GameCommand('clear-roles', TwoRooms.clear_roles, 'reset the play set and start over')
         yield GameCommand('selected-roles', TwoRooms.selected_roles, 'display the roles in the current play set')
 
-    def selected_roles_are_valid(self):
-        raise NotImplementedError
-        # return true
-
     def assign_roles(self):
         for player in self.players:
             self.role_tracker.deal_role(player)
