@@ -1,7 +1,8 @@
 TODOS:
-assign players to rooms randomly
-associate channels with rooms and be able to modify perms
-capture round count info on LEADER CARD
+run a 1 round game
+run multiple rounds assigning leaders randomly each round
+vote on leaders
+use the bot to reveal instead of ppl just talking lol
 figure out how to handle private reveal like agent
 
 TwoRoomsGame

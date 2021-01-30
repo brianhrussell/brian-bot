@@ -27,16 +27,17 @@ Then, possible
 """
 
 
-class TwoRooms(JoinableGame):
+class TwoRoomsState(Enum):
+    SETUP = 0
+    ON_BEGIN = 1
 
-    class TwoRoomsState(Enum):
-        SETUP = 0
-        ON_BEGIN = 1
+
+class TwoRooms(JoinableGame):
 
     def __init__(self, guild, user):
         super().__init__(guild, user)
         self.players = dict()  # dict of discord_user : tworooms.player.Player
-        self.state = TwoRooms.TwoRoomsState.SETUP
+        self.state = TwoRoomsState.SETUP
         self.role_tracker = RoleTracker()
         self.rooms = [Room(), Room()]
 
@@ -50,6 +51,7 @@ class TwoRooms(JoinableGame):
         yield GameCommand('list-roles', TwoRooms.list_roles, 'list the available roles')
         yield GameCommand('clear-roles', TwoRooms.clear_roles, 'reset the play set and start over')
         yield GameCommand('selected-roles', TwoRooms.selected_roles, 'display the roles in the current play set')
+        yield GameCommand('room-roles', TwoRooms.set_room_roles, 'assigns a channel to a room')
 
     def assign_roles(self):
         for user in self.joined_users:
@@ -67,7 +69,23 @@ class TwoRooms(JoinableGame):
             room_one_slots = room_one_slots - 1
         self.rooms[1].players = unassigned_players
 
+    # COMMAND HANDLERS
+    def set_room_roles(self, params, message, client):
+        if self.state != TwoRoomsState.SETUP:
+            return 'not a valid state to setup channels'
+        if message.author.id != self.leader.id:
+            return 'only the leader can set the room roles'
+        if len(message.role_mentions) != 2:
+            'please mention exactly two roles to set roles'
+        self.rooms[0].role = message.role_mentions[0]
+        self.rooms[1].role = message.role_mentions[1]
+        return 'roles set successfully. you should double check that these roles each' +\
+            ' have at least one text channel that they can see and the other cannot'
+
     def add_role(self, params, message, client):
+        if self.state != TwoRoomsState.SETUP:
+            return 'not a valid state to add a role'
+
         if len(params) == 0:
             return 'provide a role name to add try using `!game list-roles`'
         for param in params:
@@ -77,6 +95,9 @@ class TwoRooms(JoinableGame):
             return f'added roles successfully. current play set size: {len(self.role_tracker.unassigned_roles)}'
 
     def remove_role(self, params, message, client):
+        if self.state != TwoRoomsState.SETUP:
+            return 'not a valid state to remove a role'
+
         if len(params) == 0:
             return 'provide a role name to remove try using `!game list-roles` or clear all roles with `!game clear-roles`'
         for param in params:
@@ -93,6 +114,8 @@ class TwoRooms(JoinableGame):
         return '\n\n'.join(lines)
 
     def clear_roles(self, params, message, client):
+        if self.state != TwoRoomsState.SETUP:
+            return 'not a valid state to remove roles'
         self.role_tracker.clear_roles()
         return 'play set cleared'
 
@@ -101,6 +124,8 @@ class TwoRooms(JoinableGame):
         return 'selected roles:\n' + roles
 
     def begin_game(self, params, message, client):
+        if self.state != TwoRoomsState.SETUP:
+            return 'not a valid state to begin a game'
         player_id = message.author.id
         num_players = len(self.joined_users)
         if num_players < 4:
@@ -109,6 +134,9 @@ class TwoRooms(JoinableGame):
             return "the selected roles are not valid sorry," + \
                 " you'll have to figure out why on your own. selected roles:\n" + \
                 self.role_tracker.get_selected_role_names()
-        if player_id == self.leader.id:
-            self.assign_roles()
-            self.assign_rooms()
+        if not (self.rooms[0].role and self.rooms[1].role):
+            return 'you need to set a role for each room. use `!game room-roles @role1 @role2`'
+        if player_id != self.leader.id:
+            return 'only the leader can start the game'
+        self.assign_roles()
+        self.assign_rooms()
