@@ -7,6 +7,8 @@ from random import randrange
 from enum import Enum
 from random import choice
 from discord import Forbidden
+from events import Events
+
 """
 ok so this is where all the game rules start
 we may need to start breaking out more classes because

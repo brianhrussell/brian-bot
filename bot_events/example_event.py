@@ -1,7 +1,7 @@
-from events.base_event      import BaseEvent
-from utils                  import get_channel
+from bot_events.base_event import BaseEvent
+from utils import get_channel
 
-from datetime               import datetime
+from datetime import datetime
 
 
 # Your friendly example event
