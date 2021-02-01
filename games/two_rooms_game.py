@@ -8,6 +8,7 @@ from games.joinable_game import GameCommand, JoinableGame
 from games.two_rooms.role_tracker import RoleTracker
 from games.two_rooms.room import Room
 from games.two_rooms.player import Player
+
 """
 ok so this is where all the game rules start
 we may need to start breaking out more classes because
@@ -50,14 +51,17 @@ class TwoRooms(JoinableGame):
     def available_commands(self):
         for command in super().available_commands():
             yield command
-        yield GameCommand('begin', TwoRooms.begin_game, 'once all players and roles have been added begin the game and assign roles')
+        yield GameCommand('begin', TwoRooms.begin_game,
+                          'once all players and roles have been added begin the game and assign roles')
         yield GameCommand('add-role', TwoRooms.add_role, 'add a role to the play set')
         yield GameCommand('remove-role', TwoRooms.remove_role, 'remove a role from the play set')
         yield GameCommand('list-roles', TwoRooms.list_roles, 'list the available roles')
         yield GameCommand('clear-roles', TwoRooms.clear_roles, 'reset the play set and start over')
         yield GameCommand('selected-roles', TwoRooms.selected_roles, 'display the roles in the current play set')
         yield GameCommand('room-roles', TwoRooms.set_room_roles, 'assigns a channel to a room')
-        yield GameCommand('send', TwoRooms.set_sent_hostage, 'chooses a player to send as a hostage at the end of this round')
+        yield GameCommand('send', TwoRooms.set_sent_hostage,
+                          'chooses a player to send as a hostage at the end of this round')
+        yield GameCommand('test-dm', TwoRooms.send_test_dm, 'send a test dm to all players')
 
     async def assign_roles(self):
         for user in self.joined_users:
@@ -129,7 +133,7 @@ class TwoRooms(JoinableGame):
         self.rooms[0].next_sent_hostages.clear()
         self.rooms[1].next_sent_hostages.clear()
 
-# COMMAND HANDLERS
+    # COMMAND HANDLERS
     def set_room_roles(self, params, message, client):
         if self.state != TwoRoomsState.SETUP:
             return 'not a valid state to setup channels'
@@ -139,8 +143,8 @@ class TwoRooms(JoinableGame):
             'please mention exactly two roles to set roles'
         self.rooms[0].set_role(message.role_mentions[0])
         self.rooms[1].set_role(message.role_mentions[1])
-        return 'roles set successfully. you should double check that these roles each' +\
-            ' have at least one text channel that they can see and the other cannot'
+        return 'roles set successfully. you should double check that these roles each' + \
+               ' have at least one text channel that they can see and the other cannot'
 
     def add_role(self, params, message, client):
         if self.state != TwoRoomsState.SETUP:
@@ -192,8 +196,8 @@ class TwoRooms(JoinableGame):
             return 'you need more people to play'
         if not self.role_tracker.roles_are_valid(num_players):
             return "the selected roles are not valid sorry," + \
-                " you'll have to figure out why on your own. selected roles:\n" + \
-                self.role_tracker.get_selected_role_names()
+                   " you'll have to figure out why on your own. selected roles:\n" + \
+                   self.role_tracker.get_selected_role_names()
         if not (self.rooms[0].discord_role and self.rooms[1].discord_role):
             return 'you need to set a role for each room. use `!game room-roles @role1 @role2`'
         if player_id != self.leader.id:
@@ -219,11 +223,30 @@ class TwoRooms(JoinableGame):
         if room is None or room.leader != player:
             return 'you are not the room leader'
         if not self.are_hostages_valid(room, message.mentions):
-            return f'invalid hostages. you need to send {self.get_hostages_per_round()} and the leader can\'t send themself'
+            return f'invalid hostages. you need to send {self.get_hostages_per_round()} and the leader can\'t send ' \
+                   f'themself '
         await room.set_next_hostages(message.mentions)
-        return 'hostages set. they will be sent when the other room is ready. you can still change them in the meantime.'
+        return 'hostages set. they will be sent when the other room is ready. you can still change them in the ' \
+               'meantime. '
 
-# EVENT HANDLERS
+    async def send_test_dm(self, params, message, client):
+        msg = list()
+        if not self.joined_users:
+            return 'nobody has joined yet'
+        for user in self.joined_users.values():
+            try:
+                if user.dm_channel:
+                    dm = user.dm_channel
+                else:
+                    dm = await user.create_dm()
+                await dm.send('this is a test dm')
+            except Exception as e:
+                msg.append(f'failed to dm {user.mention}')
+        if not msg:
+            return 'sent DMs'
+        return '\n'.join(msg)
+
+    # EVENT HANDLERS
     async def on_hostages_set_event(self, room):
         if self.rooms[0].next_sent_hostages and self.rooms[1].next_sent_hostages:
             await self.end_round()
@@ -231,9 +254,9 @@ class TwoRooms(JoinableGame):
     async def on_round_start_event(self, round_number):
         if round_number < 4:
             return
-        msg = ['game has finished']
-        msg.append('room 1:')
-        msg.append(self.rooms[0].get_room_status())
-        msg.append('room 2:')
-        msg.append(self.rooms[1].get_room_status())
+        msg = ['game has finished',
+               'room 1:',
+               self.rooms[0].get_room_status(),
+               'room 2:',
+               self.rooms[1].get_room_status()]
         self.start_channel.send('\n'.join(msg))
