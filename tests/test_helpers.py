@@ -20,7 +20,7 @@ class BotCommandTest(asynctest.TestCase):
         game_tracker.global_tracker.remove_all_games()
 
 
-def printSentMessage(msg, channel):
+async def printSentMessage(msg, channel):
     sent_messages.append(msg)
 
 

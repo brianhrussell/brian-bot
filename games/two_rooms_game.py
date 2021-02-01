@@ -38,14 +38,14 @@ class TwoRooms(JoinableGame):
 
     def __init__(self, guild, user):
         super().__init__(guild, user)
+        self.events = Events()
         self.players = dict()  # dict of discord_user : tworooms.player.Player
         self.state = TwoRoomsState.SETUP
         self.role_tracker = RoleTracker()
-        self.rooms = [Room(), Room()]
+        self.rooms = [Room(self), Room(self)]
         self.round = 0
 
     # TODO this is so sus just make the available_commands() for each game static right?
-
     def available_commands(self):
         for command in super().available_commands():
             yield command
@@ -56,6 +56,7 @@ class TwoRooms(JoinableGame):
         yield GameCommand('clear-roles', TwoRooms.clear_roles, 'reset the play set and start over')
         yield GameCommand('selected-roles', TwoRooms.selected_roles, 'display the roles in the current play set')
         yield GameCommand('room-roles', TwoRooms.set_room_roles, 'assigns a channel to a room')
+        yield GameCommand('try-event', TwoRooms.try_event, 'temp')
 
     def assign_roles(self):
         for user in self.joined_users:
@@ -87,8 +88,8 @@ class TwoRooms(JoinableGame):
             return 'only the leader can set the room roles'
         if len(message.role_mentions) != 2:
             'please mention exactly two roles to set roles'
-        self.rooms[0].role = message.role_mentions[0]
-        self.rooms[1].role = message.role_mentions[1]
+        self.rooms[0].set_role(message.role_mentions[0])
+        self.rooms[1].set_role(message.role_mentions[1])
         return 'roles set successfully. you should double check that these roles each' +\
             ' have at least one text channel that they can see and the other cannot'
 
@@ -156,3 +157,7 @@ class TwoRooms(JoinableGame):
             self.assign_leaders_randomly()
         except Forbidden as e:
             return f'the bot is missing the permissions it needs message: {e}'
+
+    async def try_event(self, params, message, client):
+        await self.events.fire('on_round_start', 1)
+        return 'i tried'

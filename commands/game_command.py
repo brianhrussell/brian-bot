@@ -34,7 +34,7 @@ class Game(BaseCommand):
             return
         game_manager = game_tracker.get_game_for_guild(guild)
 
-        msg = game_manager.handle_message(params, message, client)
+        msg = await game_manager.handle_message(params, message, client)
         await BaseCommand.send_response(msg, message.channel)
 
     @staticmethod

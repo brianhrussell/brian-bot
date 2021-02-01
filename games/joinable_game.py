@@ -11,7 +11,7 @@ class JoinableGame(BaseGame):
     # TODO: uhhh this probably regenerates this list every time? performance check this later
 
     def available_commands(self):
-        yield JoinableGame.join_command
+        yield GameCommand('join', JoinableGame.join_game, 'join a game in progress')
 
     def __init__(self, guild, user):
         super().__init__(guild, user)
@@ -19,11 +19,11 @@ class JoinableGame(BaseGame):
         self.state = self.JoinableGameState.SETUP  # to be overwritten but subclasses with actual state enums
 
     # TODO this should probably be higher in the class hierarchy
-    def handle_message(self, params, message, client):
+    async def handle_message(self, params, message, client):
         command = params[0]
         for available_command in self.available_commands():
             if command == available_command.command:
-                return available_command.func(self, params[1::], message, client)
+                return await available_command(self, params[1::], message, client)
 
         return (f'there isn\'t an available command for this game with keyword "{command}"')
 
@@ -44,5 +44,3 @@ class JoinableGame(BaseGame):
             return f'{player} has already joined.'
         self.joined_users[player_id] = player
         return(f'added {player} to the game.')
-
-    join_command = GameCommand('join', join_game, 'join a game in progress')

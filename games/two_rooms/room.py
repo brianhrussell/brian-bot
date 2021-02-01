@@ -2,11 +2,18 @@ import discord
 
 
 class Room:
-    def __init__(self):
+    def __init__(self, game):
         self.players = list()
         self.role = None
-        self.text_channels = list()
-        self.voice_channels = list()
+        self.channel = None
+        game.events.register('on_round_start', self.on_round_start_event)
+
+    async def send_message(self, message):
+        await self.channel.send(message)
+
+    def set_role(self, role):
+        self.role = role
+        self.channel = self.guess_main_channel()
 
     def add_player(self, player):
         player.add_role(self.role)
@@ -15,3 +22,15 @@ class Room:
     def remove_player(self, player):
         player.remove_role(self.role)
         self.players.remove(player)
+
+    async def on_round_start_event(self, round_number):
+        await self.send_message(f'start of round {round_number}')
+
+    def guess_main_channel(self):
+        channels = self.role.guild.channels
+        for channel in channels:
+            if type(channel) is not discord.TextChannel or self.role not in channel.overwrites:
+                continue
+            if channel.overwrites[self.role].send_messages:
+                return channel
+        raise 'could not guess the main channel for the room sorry ask brian'

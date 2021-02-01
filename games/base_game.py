@@ -1,6 +1,7 @@
 import settings
 from discord import User
 from discord import Guild
+from inspect import iscoroutinefunction
 
 
 class BaseGame:
@@ -18,7 +19,7 @@ class BaseGame:
     # each state? so that it doesn't need to know about discord
     # but that seems impossible since it will still need to interact
     # with discord to handle the side affects of the commands.
-    def handle_message(self, params, message, client):
+    async def handle_message(self, params, message, client):
         raise NotImplementedError  # To be defined by every event
 
     def start(self, client):
@@ -37,3 +38,9 @@ class GameCommand():
         self.command = command
         self.func = func
         self.description = description
+
+    async def __call__(self, *a):
+        if iscoroutinefunction(self.func):
+            return await self.func(*a)
+        else:
+            return self.func(*a)
