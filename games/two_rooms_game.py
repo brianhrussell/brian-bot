@@ -46,6 +46,7 @@ class TwoRooms(JoinableGame):
         self.round = 0
 
     # TODO this is so sus just make the available_commands() for each game static right?
+    # consider returning only commands valid in this state
     def available_commands(self):
         for command in super().available_commands():
             yield command
@@ -56,12 +57,13 @@ class TwoRooms(JoinableGame):
         yield GameCommand('clear-roles', TwoRooms.clear_roles, 'reset the play set and start over')
         yield GameCommand('selected-roles', TwoRooms.selected_roles, 'display the roles in the current play set')
         yield GameCommand('room-roles', TwoRooms.set_room_roles, 'assigns a channel to a room')
+        yield GameCommand('send', TwoRooms.set_sent_hostage, 'chooses a player to send as a hostage at the end of this round')
 
     def assign_roles(self):
         for user in self.joined_users:
             self.players[user] = self.role_tracker.deal_role(user)
 
-    def assign_rooms(self):
+    async def assign_rooms(self):
         unassigned_players = list()
         for player in self.players.values():
             unassigned_players.append(player)
@@ -69,15 +71,21 @@ class TwoRooms(JoinableGame):
         room_one_slots = floor(num_players / 2)
         while room_one_slots > 0:
             rand_index = randrange(0, room_one_slots)
-            self.rooms[0].add_player(unassigned_players.pop(rand_index))
+            await self.rooms[0].add_player(unassigned_players.pop(rand_index))
             room_one_slots = room_one_slots - 1
         for player in unassigned_players:
-            self.rooms[1].add_player(player)
+            await self.rooms[1].add_player(player)
 
     def assign_leaders_randomly(self):
         for room in self.rooms:
             room_size = len(room.players)
             room.leader = room.players[randrange(0, room_size)]
+
+    def get_room_for_player(self, player):
+        for room in self.rooms:
+            if player in room.players:
+                return room
+        return None
 
     # COMMAND HANDLERS
     def set_room_roles(self, params, message, client):
@@ -144,16 +152,24 @@ class TwoRooms(JoinableGame):
             return "the selected roles are not valid sorry," + \
                 " you'll have to figure out why on your own. selected roles:\n" + \
                 self.role_tracker.get_selected_role_names()
-        if not (self.rooms[0].role and self.rooms[1].role):
+        if not (self.rooms[0].discord_role and self.rooms[1].discord_role):
             return 'you need to set a role for each room. use `!game room-roles @role1 @role2`'
         if player_id != self.leader.id:
             return 'only the leader can start the game'
         try:
             self.assign_roles()
-            self.assign_rooms()
+            await self.assign_rooms()
             self.state = TwoRoomsState.PLAYING
             self.round = 1
             self.assign_leaders_randomly()
             await self.events.fire('on_round_start', 1)
         except Forbidden as e:
             return f'the bot is missing the permissions it needs message: {e}'
+
+    async def set_sent_hostage(self, params, message, client):
+        if self.state != TwoRoomsState.PLAYING:
+            return 'game needs to be started to designate a hostage'
+        player = self.players[message.author]
+        room = self.get_room_for_player(player)
+        if room is None or room.leader != player:
+            return 'you are not the room leader'

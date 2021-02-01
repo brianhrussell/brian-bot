@@ -31,3 +31,12 @@ async def start_game_with_mocks_async(game_name):
     handler = StartGame()
     await handler.handle([game_name], message_mock, client_mock)
     return message_mock, client_mock
+
+
+class MockDiscordUser(mock.Mock):
+
+    async def add_roles(self, roles):
+        self('add', roles)
+
+    async def remove_roles(self, roles):
+        self('remove', roles)
