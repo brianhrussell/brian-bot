@@ -1,15 +1,15 @@
-import sys
-
-import settings
 import secrets
-import discord
-import message_handler
-import game_tracker
-
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from bot_events.base_event import BaseEvent
-from bot_events import *  # pylint: disable=unused-wildcard-import
+import sys
 from multiprocessing import Process
+
+import discord
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
+import game_tracker
+import message_handler
+import settings
+from bot_events import *  # pylint: disable=unused-wildcard-import
+from bot_events.base_event import BaseEvent
 
 # Set to remember if the bot is already running, since on_ready may be called
 # more than once on reconnects

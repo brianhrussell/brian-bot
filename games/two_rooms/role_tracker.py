@@ -1,10 +1,9 @@
+from random import choice
 from threading import Lock
 
-
-from games.two_rooms.roles.role_utils import BaseRole
-from games.two_rooms.roles import *  # pylint: disable=unused-wildcard-import
 from games.two_rooms.player import Player
-from random import choice
+from games.two_rooms.roles import *  # pylint: disable=unused-wildcard-import
+from games.two_rooms.roles.role_utils import BaseRole
 
 # Register all available roles. omit the word role from their name to save user input
 ROLE_FACTORY = {c.__name__.lower()[:-4]: c

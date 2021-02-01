@@ -1,6 +1,6 @@
-from games.base_game import BaseGame
-from games.base_game import GameCommand
 from enum import Enum
+
+from games.base_game import BaseGame, GameCommand
 
 
 class JoinableGame(BaseGame):

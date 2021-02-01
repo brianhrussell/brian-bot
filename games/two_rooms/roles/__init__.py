@@ -1,6 +1,5 @@
 from os import listdir
-from os.path import dirname, basename
-
+from os.path import basename, dirname
 
 # Import all the game managers
 

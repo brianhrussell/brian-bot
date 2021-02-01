@@ -1,6 +1,4 @@
-from games.two_rooms.roles.role_utils import BaseRole
-from games.two_rooms.roles.role_utils import CardColor
-from games.two_rooms.roles.role_utils import TeamColor
+from games.two_rooms.roles.role_utils import BaseRole, CardColor, TeamColor
 
 
 class BlueTeamRole(BaseRole):

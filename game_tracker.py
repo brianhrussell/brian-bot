@@ -1,7 +1,7 @@
 import threading
 from multiprocessing import Pool
 
-from games import *                     # pylint: disable=unused-wildcard-import
+from games import *  # pylint: disable=unused-wildcard-import
 from games.base_game import BaseGame
 
 
@@ -17,6 +17,7 @@ def all_subclasses(cls):
 GAMES_LIST = [g.__name__.lower() for g in all_subclasses(BaseGame)]
 
 global_tracker_lock = threading.Lock()
+
 
 class GameTracker:
 

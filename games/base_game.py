@@ -1,7 +1,7 @@
-import settings
-from discord import User
-from discord import Guild
 from inspect import iscoroutinefunction
+
+import settings
+from discord import Guild, User
 
 
 class BaseGame:
