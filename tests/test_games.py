@@ -108,14 +108,14 @@ class RoomTests(asynctest.TestCase):
     async def test_assign_players_to_rooms(self):
         for case in [2, 4, 7, 10, 31]:
             tworooms = TwoRooms(Mock(), Mock())
-            tworooms.players = self.generate_players_dict(case)
+            tworooms.players = await self.generate_players_dict(case)
             await tworooms.assign_rooms()
             self.assertTrue(self.rooms_are_valid(tworooms))
 
     async def test_assign_leaders_randomly(self):
         for case in [2, 4, 7, 10, 31]:
             tworooms = TwoRooms(Mock(), Mock())
-            tworooms.players = self.generate_players_dict(case)
+            tworooms.players = await self.generate_players_dict(case)
             await tworooms.assign_rooms()
             tworooms.assign_leaders_randomly()
             self.assertTrue(self.rooms_are_valid(tworooms))
@@ -178,7 +178,7 @@ class RoomTests(asynctest.TestCase):
     @staticmethod
     async def create_test_tworooms_game(num_players):
         tworooms = TwoRooms(Mock(), Mock())
-        tworooms.players = RoomTests.generate_players_dict(num_players)
+        tworooms.players = await RoomTests.generate_players_dict(num_players)
         await tworooms.assign_rooms()
         tworooms.rooms[0].channel = test_helpers.MockDiscordChannel()
         tworooms.rooms[1].channel = test_helpers.MockDiscordChannel()
@@ -192,11 +192,15 @@ class RoomTests(asynctest.TestCase):
         return send_response_mock.mock_calls[call_number][1][0]
 
     @staticmethod
-    def generate_players_dict(num_players):
+    async def generate_players_dict(num_players):
         players = dict()
         for i in range(num_players):
-            player = Player(test_helpers.MockDiscordUser(), Mock())
+            player = Player(test_helpers.MockDiscordUser())
+            mock_role = Mock(name='role')
+            mock_role.to_string = Mock(return_value="mock_role.to_string")
             player.user.mention = f'@{i}'
+            player.user.dm_channel = test_helpers.MockDiscordChannel(name='dm_channel')
+            await player.set_role(mock_role)
             players[player.user] = player
         return players
 

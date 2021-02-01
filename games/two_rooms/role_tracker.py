@@ -72,7 +72,7 @@ class RoleTracker:
                 return False
         return True
 
-    def deal_role(self, discord_user):
+    def deal_role(self):
         dealt_role = choice(self.unassigned_roles)
         self.unassigned_roles.remove(dealt_role)
-        return Player(discord_user, dealt_role)
+        return dealt_role

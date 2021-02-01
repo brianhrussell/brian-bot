@@ -7,7 +7,7 @@ from events import Events
 from games.joinable_game import GameCommand, JoinableGame
 from games.two_rooms.role_tracker import RoleTracker
 from games.two_rooms.room import Room
-
+from games.two_rooms.player import Player
 """
 ok so this is where all the game rules start
 we may need to start breaking out more classes because
@@ -59,9 +59,11 @@ class TwoRooms(JoinableGame):
         yield GameCommand('room-roles', TwoRooms.set_room_roles, 'assigns a channel to a room')
         yield GameCommand('send', TwoRooms.set_sent_hostage, 'chooses a player to send as a hostage at the end of this round')
 
-    def assign_roles(self):
+    async def assign_roles(self):
         for user in self.joined_users:
-            self.players[user] = self.role_tracker.deal_role(user)
+            player = Player(user)
+            await player.set_role(self.role_tracker.deal_role())
+            self.players[user] = player
 
     async def assign_rooms(self):
         unassigned_players = list()
@@ -198,7 +200,7 @@ class TwoRooms(JoinableGame):
             return 'only the leader can start the game'
         try:
             self.start_channel = message.channel
-            self.assign_roles()
+            await self.assign_roles()
             await self.assign_rooms()
             self.state = TwoRoomsState.PLAYING
             self.round = 1

@@ -2,6 +2,7 @@ import unittest
 from unittest import mock
 
 from games.two_rooms.role_tracker import RoleTracker
+from games.two_rooms.player import Player
 
 
 class TwoRoomsRoleTrackerTest(unittest.TestCase):
@@ -47,12 +48,16 @@ class TwoRoomsRoleTrackerTest(unittest.TestCase):
         for role in roles:
             self.assert_num_players_with_role(1, tracker.role_factory[role], player_mocks)
 
+    # this helper will not call player.set_role so side effects of dealing role will not be executed this is
+    # intentional so that these tests don't need to be async, but don't add tests here that care about side-effects
     @staticmethod
     def deal_roles(tracker, num_players):
         player_mocks = list()
         for i in range(0, num_players):  # pylint: disable=unused-variable
             user_mock = mock.Mock()
-            player_mocks.append(tracker.deal_role(user_mock))
+            player = Player(user_mock)
+            player.role = tracker.deal_role()
+            player_mocks.append(player)
         return player_mocks
 
     @staticmethod
