@@ -1,6 +1,7 @@
 import unittest
 from unittest import mock
 import asynctest
+import asyncio
 
 import test_helpers
 from commands.game_command import Game              # pylint: disable=import-error
@@ -129,6 +130,16 @@ class RoomTests(unittest.TestCase):
     def assert_rooms_are_valid(self, tworooms):
         for player in tworooms.players.values():
             self.assertTrue((player in tworooms.rooms[0].players) ^ (player in tworooms.rooms[1].players))
+
+
+class AsyncRoomTests(asynctest.TestCase):
+
+    @mock.patch('games.two_rooms.room.Room.send_message')
+    async def test_round_start_event(self, send_response_mock):
+        tworooms = TwoRooms(mock.Mock(), mock.Mock())
+        tworooms.players = RoomTests.generate_room_with_players(12)
+        await tworooms.events.fire('on_round_start', 1)
+        self.assertNotEqual(0, send_response_mock.call_count)
 
 
 if __name__ == "__main__":
