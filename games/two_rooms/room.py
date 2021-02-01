@@ -61,6 +61,5 @@ class Room:
     async def on_round_start_event(self, round_number):
         if round_number > 3:
             return
-        msg = [f'start of round {round_number}']
-        msg.append(self.get_room_status())
+        msg = [f'start of round {round_number}', self.get_room_status()]
         await self.send_message('\n'.join(msg))
