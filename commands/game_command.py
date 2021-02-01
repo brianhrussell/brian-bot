@@ -5,7 +5,7 @@ from utils import get_emoji
 import game_tracker
 
 
-class Game(BaseCommand):
+class G(BaseCommand):
 
     def __init__(self):
         # A quick description for the help message

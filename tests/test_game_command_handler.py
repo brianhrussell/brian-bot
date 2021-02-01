@@ -2,7 +2,7 @@ import unittest
 from unittest import mock
 import test_helpers
 
-from commands.game_command import Game              # pylint: disable=import-error
+from commands.game_command import G              # pylint: disable=import-error
 from commands.listgames_command import ListGames    # pylint: disable=import-error
 from commands.start_game_command import StartGame   # pylint: disable=import-error
 from commands.end_game_command import EndGame       # pylint: disable=import-error
@@ -15,7 +15,7 @@ class BasicGameCommandTests(test_helpers.BotCommandTest):
     @mock.patch('commands.base_command.BaseCommand.send_response')
     async def test_game_command(self, send_response_mock):
         send_response_mock.side_effect = test_helpers.printSentMessage
-        handler = Game()
+        handler = G()
         await handler.handle([], mock.Mock(name='message'), mock.Mock(name='client'))
         self.assertEqual(1, send_response_mock.call_count)
 
@@ -24,7 +24,7 @@ class BasicGameCommandTests(test_helpers.BotCommandTest):
         send_response_mock.side_effect = test_helpers.printSentMessage
         message_mock, client_mock = await test_helpers.start_game_with_mocks_async('joinablegame')
 
-        game_handler = Game()
+        game_handler = G()
         await game_handler.handle(['join'], message_mock, client_mock)
 
         self.assertEqual(2, send_response_mock.call_count)

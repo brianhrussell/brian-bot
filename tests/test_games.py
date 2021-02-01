@@ -5,7 +5,7 @@ from unittest.mock import Mock
 import asynctest
 
 import test_helpers
-from commands.game_command import Game  # pylint: disable=import-error
+from commands.game_command import G  # pylint: disable=import-error
 from game_tracker import get_game_for_guild
 from games.two_rooms_game import TwoRooms
 from games.two_rooms_game import TwoRoomsState
@@ -19,7 +19,7 @@ class TwoRoomsGameTests(test_helpers.BotCommandTest):
         send_response_mock.side_effect = test_helpers.printSentMessage
         message_mock, client_mock = await test_helpers.start_game_with_mocks_async('tworooms')
 
-        game_handler = Game()
+        game_handler = G()
         await game_handler.handle(['join'], message_mock, client_mock)
 
         self.assertEqual(2, send_response_mock.call_count)
@@ -30,7 +30,7 @@ class TwoRoomsGameTests(test_helpers.BotCommandTest):
         send_response_mock.side_effect = test_helpers.printSentMessage
         message_mock, client_mock = await test_helpers.start_game_with_mocks_async('tworooms')
 
-        game_handler = Game()
+        game_handler = G()
         await game_handler.handle(['add-role'], message_mock, client_mock)
 
         self.assertEqual(2, send_response_mock.call_count)
@@ -43,7 +43,7 @@ class TwoRoomsGameTests(test_helpers.BotCommandTest):
         send_response_mock.side_effect = test_helpers.printSentMessage
         message_mock, client_mock = await test_helpers.start_game_with_mocks_async('tworooms')
 
-        game_handler = Game()
+        game_handler = G()
         await game_handler.handle(['add-role', 'Bomb'], message_mock, client_mock)
 
         self.assertEqual(2, send_response_mock.call_count)
@@ -57,7 +57,7 @@ class TwoRoomsGameTests(test_helpers.BotCommandTest):
         send_response_mock.side_effect = test_helpers.printSentMessage
         message_mock, client_mock = await test_helpers.start_game_with_mocks_async('tworooms')
 
-        game_handler = Game()
+        game_handler = G()
         await game_handler.handle(['add-role', 'Bomb'], message_mock, client_mock)
         await game_handler.handle(['remove-role', 'Bomb'], message_mock, client_mock)
 
@@ -71,7 +71,7 @@ class TwoRoomsGameTests(test_helpers.BotCommandTest):
         send_response_mock.side_effect = test_helpers.printSentMessage
         message_mock, client_mock = await test_helpers.start_game_with_mocks_async('tworooms')
 
-        game_handler = Game()
+        game_handler = G()
         await game_handler.handle(['list-roles'], message_mock, client_mock)
 
         self.assertEqual(2, send_response_mock.call_count)
@@ -82,7 +82,7 @@ class TwoRoomsGameTests(test_helpers.BotCommandTest):
         send_response_mock.side_effect = test_helpers.printSentMessage
         message_mock, client_mock = await test_helpers.start_game_with_mocks_async('tworooms')
 
-        game_handler = Game()
+        game_handler = G()
         await game_handler.handle(['add-role', 'Bomb'], message_mock, client_mock)
         await game_handler.handle(['add-role', 'President'], message_mock, client_mock)
         await game_handler.handle(['selected-roles'], message_mock, client_mock)
@@ -95,7 +95,7 @@ class TwoRoomsGameTests(test_helpers.BotCommandTest):
         send_response_mock.side_effect = test_helpers.printSentMessage
         message_mock, client_mock = await test_helpers.start_game_with_mocks_async('tworooms')
 
-        game_handler = Game()
+        game_handler = G()
         await game_handler.handle(['add-role', 'Bomb'], message_mock, client_mock)
         await game_handler.handle(['add-role', 'President'], message_mock, client_mock)
         await game_handler.handle(['begin'], message_mock, client_mock)
