@@ -2,10 +2,9 @@ from games.joinable_game import JoinableGame
 from games.joinable_game import GameCommand
 from games.two_rooms.role_tracker import RoleTracker
 from games.two_rooms.room import Room
-from math import floor, ceil
-from random import randrange
-from enum import Enum
+from math import ceil
 from random import choice
+from enum import Enum
 from discord import Forbidden
 from events import Events
 
@@ -69,18 +68,18 @@ class TwoRooms(JoinableGame):
         for player in self.players.values():
             unassigned_players.append(player)
         num_players = len(unassigned_players)
-        room_one_slots = floor(num_players / 2)
+        room_one_slots = num_players // 2
         while room_one_slots > 0:
-            rand_index = randrange(0, room_one_slots)
-            await self.rooms[0].add_player(unassigned_players.pop(rand_index))
+            random_player = choice(unassigned_players)
+            unassigned_players.remove(random_player)
+            await self.rooms[0].add_player(random_player)
             room_one_slots = room_one_slots - 1
         for player in unassigned_players:
             await self.rooms[1].add_player(player)
 
     def assign_leaders_randomly(self):
         for room in self.rooms:
-            room_size = len(room.players)
-            room.leader = room.players[randrange(0, room_size)]
+            room.leader = choice(room.players)
 
     def get_room_for_player(self, player):
         for room in self.rooms:
@@ -106,7 +105,7 @@ class TwoRooms(JoinableGame):
 
     def get_hostages_per_round(self):
         num_players = len(self.players)
-        game_size = floor(num_players / 11)
+        game_size = num_players // 11
         return max(game_size + 2 - self.round, 1)
 
     async def end_round(self):

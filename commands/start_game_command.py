@@ -45,4 +45,4 @@ def _construct_game_moderator(game_name, guild, game_leader):
     for g in all_subclasses(BaseGame):
         if g.__name__.lower() == game_name:
             return g(guild, game_leader)
-    raise 'game not found'
+    raise Exception('game not found')

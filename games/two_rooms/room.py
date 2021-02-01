@@ -34,7 +34,7 @@ class Room:
                 continue
             if channel.overwrites[self.discord_role].send_messages:
                 return channel
-        raise 'could not guess the main channel for the room sorry ask brian'
+        raise Exception('could not guess the main channel for the room sorry ask brian')
 
     async def set_next_hostages(self, mentions):
         if len(self.next_sent_hostages) == 0:
