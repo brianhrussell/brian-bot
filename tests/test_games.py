@@ -161,6 +161,15 @@ class RoomTests(asynctest.TestCase):
         msg = await tworooms.set_sent_hostage([], message_mock, client_mock)
         self.assertFalse('invalid' in msg)
 
+    async def test_end_game_message(self):
+        tworooms = await self.create_test_tworooms_game(10)
+        tworooms.round = 4
+        channel_mock = Mock()
+        tworooms.start_channel = channel_mock
+        await tworooms.on_round_start_event(4)
+        self.assertTrue(channel_mock.send.call_count > 0)
+        self.assertTrue('game has finished' in self.get_mock_send_parameter(channel_mock, 0))
+
     @staticmethod
     async def create_test_tworooms_game(num_players):
         tworooms = TwoRooms(Mock(), Mock())

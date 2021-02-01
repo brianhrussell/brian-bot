@@ -41,18 +41,26 @@ class Room:
             self.events.fire('on_hostages_set', self)
         self.next_sent_hostages = mentions
 
+    def get_room_status(self):
+        status = list()
+        status.append(f'leader is {self.leader.user.mention}')
+        status.append('players in this room:')
+        for player in self.players:
+            if player is self.leader:
+                continue
+            status.append(player.user.mention)
+        return '\n'.join(status)
+
 # EVENT HANDLERS
+
     async def on_hostages_set_event(self, room):
         if room is self:
             return
         await self.channel.send('the other room has picked their hostage(s).')
 
     async def on_round_start_event(self, round_number):
+        if round_number > 3:
+            return
         msg = [f'start of round {round_number}']
-        msg.append(f'leader is {self.leader.user.mention}')
-        msg.append('players in this room:')
-        for player in self.players:
-            if player is self.leader:
-                continue
-            msg.append(player.user.mention)
+        msg.append(self.get_room_status())
         await self.send_message('\n'.join(msg))

@@ -44,6 +44,7 @@ class TwoRooms(JoinableGame):
         self.role_tracker = RoleTracker()
         self.rooms = [Room(self), Room(self)]
         self.round = 0
+        self.start_channel = None
 
     # TODO this is so sus just make the available_commands() for each game static right?
     # consider returning only commands valid in this state
@@ -99,7 +100,7 @@ class TwoRooms(JoinableGame):
     ''' get_hostages_per_round chart
     round     1   2   3
     6-10      1   1   1
-    11-21     2   1   1   
+    11-21     2   1   1
     22+       3   2   1
     '''
 
@@ -108,8 +109,26 @@ class TwoRooms(JoinableGame):
         game_size = floor(num_players / 11)
         return max(game_size + 2 - self.round, 1)
 
-    # COMMAND HANDLERS
+    async def end_round(self):
+        self.exchange_hostages()
+        self.round += 1
+        await self.events.fire('on_round_start', self.round)
 
+    async def exchange_hostages(self):
+        send_to_two = self.rooms[0].next_sent_hostages
+        send_to_one = self.rooms[1].next_sent_hostages
+        for user in send_to_two:
+            player = self.players[user]
+            await self.rooms[0].remove_player(player)
+            await self.rooms[1].add_player(player)
+        for user in send_to_one:
+            player = self.players[user]
+            await self.rooms[1].remove_player(player)
+            await self.rooms[0].add_player(player)
+        self.rooms[0].next_sent_hostages.clear()
+        self.rooms[1].next_sent_hostages.clear()
+
+# COMMAND HANDLERS
     def set_room_roles(self, params, message, client):
         if self.state != TwoRoomsState.SETUP:
             return 'not a valid state to setup channels'
@@ -179,11 +198,14 @@ class TwoRooms(JoinableGame):
         if player_id != self.leader.id:
             return 'only the leader can start the game'
         try:
+            self.start_channel = message.channel
             self.assign_roles()
             await self.assign_rooms()
             self.state = TwoRoomsState.PLAYING
             self.round = 1
             self.assign_leaders_randomly()
+            self.events.register('on_hostages_set', self.on_hostages_set_event)
+            self.events.register('on_round_start', self.on_round_start_event)
             await self.events.fire('on_round_start', 1)
         except Forbidden as e:
             return f'the bot is missing the permissions it needs message: {e}'
@@ -199,3 +221,18 @@ class TwoRooms(JoinableGame):
             return f'invalid hostages. you need to send {self.get_hostages_per_round()} and the leader can\'t send themself'
         await room.set_next_hostages(message.mentions)
         return 'hostages set. they will be sent when the other room is ready. you can still change them in the meantime.'
+
+# EVENT HANDLERS
+    async def on_hostages_set_event(self, room):
+        if self.rooms[0].next_sent_hostages and self.rooms[1].next_sent_hostages:
+            await self.end_round()
+
+    async def on_round_start_event(self, round_number):
+        if round_number < 4:
+            return
+        msg = ['game has finished']
+        msg.append('room 1:')
+        msg.append(self.rooms[0].get_room_status())
+        msg.append('room 2:')
+        msg.append(self.rooms[1].get_room_status())
+        self.start_channel.send('\n'.join(msg))

@@ -1,9 +1,9 @@
 TODOS:
-let leader send players at the end of rounds
-run a 1 round game
-run multiple rounds assigning leaders randomly each round
+test exchange hostages
+let leader abdicate
 vote on leaders
-use the bot to reveal instead of ppl just talking lol
+use the bot to reveal instead of ppl just talking
+add more roles
 figure out how to handle private reveal like agent
 
 TwoRoomsGame
