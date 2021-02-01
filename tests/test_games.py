@@ -5,7 +5,7 @@ from unittest.mock import Mock
 import asynctest
 
 import test_helpers
-from commands.game_command import Game              # pylint: disable=import-error
+from commands.game_command import Game  # pylint: disable=import-error
 from game_tracker import get_game_for_guild
 from games.two_rooms_game import TwoRooms
 from games.two_rooms_game import TwoRoomsState
@@ -122,7 +122,7 @@ class RoomTests(asynctest.TestCase):
             self.assertTrue(tworooms.rooms[0].leader in tworooms.rooms[0].players)
             self.assertTrue(tworooms.rooms[1].leader in tworooms.rooms[1].players)
 
-    @ mock.patch('games.two_rooms.room.Room.send_message')
+    @mock.patch('games.two_rooms.room.Room.send_message')
     async def test_round_start_event(self, send_response_mock):
         tworooms = await self.create_test_tworooms_game(12)
 
@@ -136,28 +136,35 @@ class RoomTests(asynctest.TestCase):
 
     async def test_set_sent_hostage_invalid(self):
         tworooms = await self.create_test_tworooms_game(10)
-        room_leader = tworooms.rooms[0].leader
-        message_mock = Mock()
-        client_mock = Mock()
-        message_mock.author = room_leader.user
-        message_mock.mentions = [room_leader.user]
-
-        msg = await tworooms.set_sent_hostage([], message_mock, client_mock)
+        msg = await self.set_sent_hostages(tworooms, 0, 2)
         self.assertTrue('invalid' in msg)
 
     async def test_set_sent_hostage_valid(self):
         tworooms = await self.create_test_tworooms_game(10)
-        room_leader = tworooms.rooms[0].leader
-        message_mock = Mock()
-        client_mock = Mock()
-        message_mock.author = room_leader.user
-        for player in tworooms.rooms[0].players:
-            if player is not room_leader:
-                message_mock.mentions = [player.user]
-                break
-
-        msg = await tworooms.set_sent_hostage([], message_mock, client_mock)
+        msg = await self.set_sent_hostages(tworooms, 0, 1)
         self.assertFalse('invalid' in msg)
+
+    async def test_exchange_hostages(self):
+        tworooms = await self.create_test_tworooms_game(10)
+        room1 = tworooms.rooms[1]
+        room0 = tworooms.rooms[0]
+        await self.set_sent_hostages(tworooms, 0, 1)
+        await self.set_sent_hostages(tworooms, 1, 1)
+        original_rooms = [room0.players.copy(), room1.players.copy()]
+        sent_hostages = [room0.next_sent_hostages.copy(), room1.next_sent_hostages.copy()]
+        await tworooms.exchange_hostages()
+        self.assertEqual(room0.channel.call_count, 1)
+        self.assertEqual(room1.channel.call_count, 1)
+        await self.assert_players_were_transferred(tworooms, sent_hostages, original_rooms)
+
+    async def assert_players_were_transferred(self, tworooms, sent_hostages, original_rooms):
+        for room_number in range(2):
+            players_are_still_in_room = any(
+                True for player in sent_hostages[room_number] if player.user in tworooms.rooms[room_number].players)
+            players_were_originally_in_room = all(
+                True for player in sent_hostages[room_number] if player.user in original_rooms)
+            self.assertFalse(players_are_still_in_room)
+            self.assertTrue(players_were_originally_in_room)
 
     async def test_end_game_message(self):
         tworooms = await self.create_test_tworooms_game(10)
@@ -173,16 +180,18 @@ class RoomTests(asynctest.TestCase):
         tworooms = TwoRooms(Mock(), Mock())
         tworooms.players = RoomTests.generate_players_dict(num_players)
         await tworooms.assign_rooms()
+        tworooms.rooms[0].channel = test_helpers.MockDiscordChannel()
+        tworooms.rooms[1].channel = test_helpers.MockDiscordChannel()
         tworooms.assign_leaders_randomly()
         tworooms.state = TwoRoomsState.PLAYING
         tworooms.round = 1
         return tworooms
 
-    @ staticmethod
+    @staticmethod
     def get_mock_send_parameter(send_response_mock, call_number):
         return send_response_mock.mock_calls[call_number][1][0]
 
-    @ staticmethod
+    @staticmethod
     def generate_players_dict(num_players):
         players = dict()
         for i in range(num_players):
@@ -191,10 +200,30 @@ class RoomTests(asynctest.TestCase):
             players[player.user] = player
         return players
 
-    @ staticmethod
+    @staticmethod
     def rooms_are_valid(tworooms):
         for player in tworooms.players.values():
             return (player in tworooms.rooms[0].players) ^ (player in tworooms.rooms[1].players)
+
+    @staticmethod
+    async def set_sent_hostages(tworooms, room_number, num_hostages):
+        message_mock = Mock()
+        client_mock = Mock()
+        message_mock.author = tworooms.rooms[room_number].leader.user
+        message_mock.mentions = list(RoomTests.get_non_leader_players(num_hostages, tworooms.rooms[room_number]))
+        return await tworooms.set_sent_hostage([], message_mock, client_mock)
+
+    @staticmethod
+    def get_non_leader_players(num_players, room):
+        room_leader = room.leader
+        players = room.players
+        i = 0
+        for player in players:
+            if player is not room_leader:
+                i += 1
+                yield player.user
+            if i >= num_players:
+                break
 
 
 if __name__ == "__main__":

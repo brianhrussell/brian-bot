@@ -38,7 +38,7 @@ class Room:
 
     async def set_next_hostages(self, mentions):
         if len(self.next_sent_hostages) == 0:
-            self.events.fire('on_hostages_set', self)
+            await self.events.fire('on_hostages_set', self)
         self.next_sent_hostages = mentions
 
     def get_room_status(self):

@@ -1,7 +1,7 @@
 from unittest import mock
 import asynctest
-from commands.start_game_command import StartGame   # pylint: disable=import-error
-import game_tracker                                 # pylint: disable=import-error
+from commands.start_game_command import StartGame  # pylint: disable=import-error
+import game_tracker  # pylint: disable=import-error
 
 sent_messages = list()
 
@@ -36,3 +36,9 @@ class MockDiscordUser(mock.Mock):
 
     async def remove_roles(self, roles):
         self('remove', roles)
+
+
+class MockDiscordChannel(mock.Mock):
+
+    async def send(self, message):
+        self('send', message)
