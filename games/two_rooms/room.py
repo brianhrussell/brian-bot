@@ -6,6 +6,7 @@ class Room:
         self.players = list()
         self.role = None
         self.channel = None
+        self.leader = None
         game.events.register('on_round_start', self.on_round_start_event)
 
     async def send_message(self, message):
@@ -24,8 +25,12 @@ class Room:
         self.players.remove(player)
 
     async def on_round_start_event(self, round_number):
-        msg = [f'start of round {round_number}\nplayers in this room:']
+        msg = [f'start of round {round_number}']
+        msg.append(f'leader is {self.leader.mention}')
+        msg.append('players in this room:')
         for player in self.players:
+            if player is self.leader:
+                continue
             msg.append(player.user.mention)
         await self.send_message('\n'.join(msg))
 

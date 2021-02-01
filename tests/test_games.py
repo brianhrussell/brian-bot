@@ -141,6 +141,8 @@ class AsyncRoomTests(asynctest.TestCase):
         tworooms = TwoRooms(mock.Mock(), mock.Mock())
         tworooms.players = RoomTests.generate_players_dict(12)
         tworooms.assign_rooms()
+        tworooms.assign_leaders_randomly()
+
         await tworooms.events.fire('on_round_start', 1)
         self.assertEqual(2, send_response_mock.call_count)
 
