@@ -47,14 +47,16 @@ class TwoRoomsRoleTrackerTest(unittest.TestCase):
         for role in roles:
             self.assert_num_players_with_role(1, tracker.role_factory[role], player_mocks)
 
-    def deal_roles(self, tracker, num_players):
+    @staticmethod
+    def deal_roles(tracker, num_players):
         player_mocks = list()
         for i in range(0, num_players):  # pylint: disable=unused-variable
             user_mock = mock.Mock()
             player_mocks.append(tracker.deal_role(user_mock))
         return player_mocks
 
-    def add_roles(self, tracker, role_names):
+    @staticmethod
+    def add_roles(tracker, role_names):
         for role in role_names:
             tracker.add_role(role)
 

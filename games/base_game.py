@@ -1,8 +1,5 @@
 from inspect import iscoroutinefunction
 
-import settings
-from discord import Guild, User
-
 
 class BaseGame:
     # base class for a game. base requires a guild and a player to start it
@@ -32,7 +29,7 @@ class BaseGame:
         raise NotImplementedError  # To be defined by every event
 
 
-class GameCommand():
+class GameCommand:
 
     def __init__(self, command, func, description):
         self.command = command

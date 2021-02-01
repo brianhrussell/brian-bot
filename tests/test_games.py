@@ -3,11 +3,9 @@ from unittest import mock
 from unittest.mock import Mock
 
 import asynctest
-import asyncio
 
 import test_helpers
 from commands.game_command import Game              # pylint: disable=import-error
-from commands.start_game_command import StartGame   # pylint: disable=import-error
 from game_tracker import get_game_for_guild
 from games.two_rooms_game import TwoRooms
 from games.two_rooms_game import TwoRoomsState
@@ -17,7 +15,7 @@ from games.two_rooms.player import Player
 class TwoRoomsGameTests(test_helpers.BotCommandTest):
 
     @mock.patch('commands.base_command.BaseCommand.send_response')
-    async def test_tworoomsgamerunning_joincommand_joinsgame(self, send_response_mock):
+    async def test_tworooms_game_running_joincommand_joinsgame(self, send_response_mock):
         send_response_mock.side_effect = test_helpers.printSentMessage
         message_mock, client_mock = await test_helpers.start_game_with_mocks_async('tworooms')
 
@@ -52,7 +50,7 @@ class TwoRoomsGameTests(test_helpers.BotCommandTest):
         self.assertTrue('added roles successfully' in test_helpers.sent_messages[1])
         two_rooms_game = get_game_for_guild('mock_guild')
         self.assertEqual(1, len(two_rooms_game.role_tracker.unassigned_roles))
-        two_rooms_game.role_tracker.unassigned_roles[0].name == 'Bomb'
+        self.assertEqual(two_rooms_game.role_tracker.unassigned_roles[0].name, 'Bomb')
 
     @mock.patch('commands.base_command.BaseCommand.send_response')
     async def test_tworoomsgamewithonerole_removerolecommand_removesrole(self, send_response_mock):

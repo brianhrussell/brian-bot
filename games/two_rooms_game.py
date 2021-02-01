@@ -1,5 +1,4 @@
 from enum import Enum
-from math import ceil
 from random import choice
 
 from discord import Forbidden
@@ -110,7 +109,7 @@ class TwoRooms(JoinableGame):
         return max(game_size + 2 - self.round, 1)
 
     async def end_round(self):
-        self.exchange_hostages()
+        await self.exchange_hostages()
         self.round += 1
         await self.events.fire('on_round_start', self.round)
 

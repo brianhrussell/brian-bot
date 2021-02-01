@@ -1,10 +1,6 @@
-import unittest
 from unittest import mock
 import asynctest
-from commands.game_command import Game              # pylint: disable=import-error
-from commands.listgames_command import ListGames    # pylint: disable=import-error
 from commands.start_game_command import StartGame   # pylint: disable=import-error
-from commands.end_game_command import EndGame       # pylint: disable=import-error
 import game_tracker                                 # pylint: disable=import-error
 
 sent_messages = list()

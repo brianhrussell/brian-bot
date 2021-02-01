@@ -25,7 +25,7 @@ class JoinableGame(BaseGame):
             if command == available_command.command:
                 return await available_command(self, params[1::], message, client)
 
-        return (f'there isn\'t an available command for this game with keyword "{command}"')
+        return f'there isn\'t an available command for this game with keyword "{command}"'
 
     def start(self, client):
         print('joinable game started')
@@ -43,4 +43,4 @@ class JoinableGame(BaseGame):
             # TODO test this >_>
             return f'{player} has already joined.'
         self.joined_users[player_id] = player
-        return(f'added {player} to the game.')
+        return f'added {player} to the game.'

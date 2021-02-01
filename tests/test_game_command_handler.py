@@ -1,8 +1,7 @@
 import unittest
 from unittest import mock
-import asynctest
-
 import test_helpers
+
 from commands.game_command import Game              # pylint: disable=import-error
 from commands.listgames_command import ListGames    # pylint: disable=import-error
 from commands.start_game_command import StartGame   # pylint: disable=import-error
