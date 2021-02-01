@@ -7,7 +7,9 @@ class Room:
         self.discord_role = None
         self.channel = None
         self.leader = None
-        game.events.register('on_round_start', self.on_round_start_event)
+        self.next_sent_hostages = list()
+        self.events = game.events
+        self.events.register('on_round_start', self.on_round_start_event)
 
     async def send_message(self, message):
         await self.channel.send(message)
@@ -42,3 +44,8 @@ class Room:
             if channel.overwrites[self.discord_role].send_messages:
                 return channel
         raise 'could not guess the main channel for the room sorry ask brian'
+
+    async def set_next_hostages(self, mentions):
+        if len(self.next_sent_hostages) == 0:
+            self.events.fire('on_hostages_set', self)
+        self.next_sent_hostages = mentions

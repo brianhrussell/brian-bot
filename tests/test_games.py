@@ -126,10 +126,7 @@ class RoomTests(asynctest.TestCase):
 
     @ mock.patch('games.two_rooms.room.Room.send_message')
     async def test_round_start_event(self, send_response_mock):
-        tworooms = TwoRooms(Mock(), Mock())
-        tworooms.players = RoomTests.generate_players_dict(12)
-        await tworooms.assign_rooms()
-        tworooms.assign_leaders_randomly()
+        tworooms = await self.create_test_tworooms_game(12)
 
         await tworooms.events.fire('on_round_start', 1)
         self.assertEqual(2, send_response_mock.call_count)
@@ -139,21 +136,40 @@ class RoomTests(asynctest.TestCase):
         self.assertTrue('start of round 1' in first_message and 'start of round 1' in second_message)
         self.assertNotEqual(first_message, second_message)
 
-    async def test_set_send_player(self):
-        for case in [2, 4, 7, 10, 31]:
-            tworooms = TwoRooms(Mock(), Mock())
-            tworooms.players = RoomTests.generate_players_dict(case)
-            await tworooms.assign_rooms()
-            tworooms.assign_leaders_randomly()
-            room_leader = tworooms.rooms[0].leader
-            message_mock = Mock()
-            client_mock = Mock()
-            message_mock.author = room_leader.user
-            tworooms.state = TwoRoomsState.PLAYING
-            await tworooms.set_send_player([], message_mock, client_mock)
-            RoomTests.rooms_are_valid(tworooms)
-            self.assertTrue(tworooms.rooms[0].leader in tworooms.rooms[0].players)
-            self.assertTrue(tworooms.rooms[1].leader in tworooms.rooms[1].players)
+    async def test_set_sent_hostage_invalid(self):
+        tworooms = await self.create_test_tworooms_game(10)
+        room_leader = tworooms.rooms[0].leader
+        message_mock = Mock()
+        client_mock = Mock()
+        message_mock.author = room_leader.user
+        message_mock.mentions = [room_leader.user]
+
+        msg = await tworooms.set_sent_hostage([], message_mock, client_mock)
+        self.assertTrue('invalid' in msg)
+
+    async def test_set_sent_hostage_valid(self):
+        tworooms = await self.create_test_tworooms_game(10)
+        room_leader = tworooms.rooms[0].leader
+        message_mock = Mock()
+        client_mock = Mock()
+        message_mock.author = room_leader.user
+        for player in tworooms.rooms[0].players:
+            if player is not room_leader:
+                message_mock.mentions = [player.user]
+                break
+
+        msg = await tworooms.set_sent_hostage([], message_mock, client_mock)
+        self.assertFalse('invalid' in msg)
+
+    @staticmethod
+    async def create_test_tworooms_game(num_players):
+        tworooms = TwoRooms(Mock(), Mock())
+        tworooms.players = RoomTests.generate_players_dict(num_players)
+        await tworooms.assign_rooms()
+        tworooms.assign_leaders_randomly()
+        tworooms.state = TwoRoomsState.PLAYING
+        tworooms.round = 1
+        return tworooms
 
     @ staticmethod
     def get_mock_send_parameter(send_response_mock, call_number):

@@ -87,7 +87,29 @@ class TwoRooms(JoinableGame):
                 return room
         return None
 
+    def are_hostages_valid(self, room, mentions):
+        if len(mentions) != self.get_hostages_per_round():
+            return False
+        for user in mentions:
+            player = self.players[user]
+            if player is room.leader or player not in room.players:
+                return False
+        return True
+
+    ''' get_hostages_per_round chart
+    round     1   2   3
+    6-10      1   1   1
+    11-21     2   1   1   
+    22+       3   2   1
+    '''
+
+    def get_hostages_per_round(self):
+        num_players = len(self.players)
+        game_size = floor(num_players / 11)
+        return max(game_size + 2 - self.round, 1)
+
     # COMMAND HANDLERS
+
     def set_room_roles(self, params, message, client):
         if self.state != TwoRoomsState.SETUP:
             return 'not a valid state to setup channels'
@@ -173,3 +195,7 @@ class TwoRooms(JoinableGame):
         room = self.get_room_for_player(player)
         if room is None or room.leader != player:
             return 'you are not the room leader'
+        if not self.are_hostages_valid(room, message.mentions):
+            return f'invalid hostages. you need to send {self.get_hostages_per_round()} and the leader can\'t send themself'
+        await room.set_next_hostages(message.mentions)
+        return 'hostages set. they will be sent when the other room is ready. you can still change them in the meantime.'
