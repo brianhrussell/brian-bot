@@ -10,6 +10,7 @@ class Room:
         self.next_sent_hostages = list()
         self.events = game.events
         self.events.register('on_round_start', self.on_round_start_event)
+        self.events.register('on_hostages_set', self.on_hostages_set_event)
 
     async def send_message(self, message):
         await self.channel.send(message)
@@ -26,16 +27,6 @@ class Room:
         await player.remove_discord_role(self.discord_role)
         self.players.remove(player)
 
-    async def on_round_start_event(self, round_number):
-        msg = [f'start of round {round_number}']
-        msg.append(f'leader is {self.leader.user.mention}')
-        msg.append('players in this room:')
-        for player in self.players:
-            if player is self.leader:
-                continue
-            msg.append(player.user.mention)
-        await self.send_message('\n'.join(msg))
-
     def guess_main_channel(self):
         channels = self.discord_role.guild.channels
         for channel in channels:
@@ -49,3 +40,19 @@ class Room:
         if len(self.next_sent_hostages) == 0:
             self.events.fire('on_hostages_set', self)
         self.next_sent_hostages = mentions
+
+# EVENT HANDLERS
+    async def on_hostages_set_event(self, room):
+        if room is self:
+            return
+        await self.channel.send('the other room has picked their hostage(s).')
+
+    async def on_round_start_event(self, round_number):
+        msg = [f'start of round {round_number}']
+        msg.append(f'leader is {self.leader.user.mention}')
+        msg.append('players in this room:')
+        for player in self.players:
+            if player is self.leader:
+                continue
+            msg.append(player.user.mention)
+        await self.send_message('\n'.join(msg))
