@@ -56,7 +56,6 @@ class TwoRooms(JoinableGame):
         yield GameCommand('clear-roles', TwoRooms.clear_roles, 'reset the play set and start over')
         yield GameCommand('selected-roles', TwoRooms.selected_roles, 'display the roles in the current play set')
         yield GameCommand('room-roles', TwoRooms.set_room_roles, 'assigns a channel to a room')
-        yield GameCommand('try-event', TwoRooms.try_event, 'temp')
 
     def assign_roles(self):
         for user in self.joined_users:
@@ -134,7 +133,7 @@ class TwoRooms(JoinableGame):
         roles = self.role_tracker.get_selected_role_names()
         return 'selected roles:\n' + roles
 
-    def begin_game(self, params, message, client):
+    async def begin_game(self, params, message, client):
         if self.state != TwoRoomsState.SETUP:
             return 'not a valid state to begin a game'
         player_id = message.author.id
@@ -155,9 +154,6 @@ class TwoRooms(JoinableGame):
             self.state = TwoRoomsState.PLAYING
             self.round = 1
             self.assign_leaders_randomly()
+            await self.events.fire('on_round_start', 1)
         except Forbidden as e:
             return f'the bot is missing the permissions it needs message: {e}'
-
-    async def try_event(self, params, message, client):
-        await self.events.fire('on_round_start', 1)
-        return 'i tried'

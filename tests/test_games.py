@@ -106,14 +106,14 @@ class RoomTests(unittest.TestCase):
     def test_assign_players_to_rooms(self):
         for case in [2, 4, 7, 10, 31]:
             tworooms = TwoRooms(mock.Mock(), mock.Mock())
-            tworooms.players = self.generate_room_with_players(case)
+            tworooms.players = self.generate_players_dict(case)
             tworooms.assign_rooms()
             self.assert_rooms_are_valid(tworooms)
 
     def test_assign_leaders_randomly(self):
         for case in [2, 4, 7, 10, 31]:
             tworooms = TwoRooms(mock.Mock(), mock.Mock())
-            tworooms.players = self.generate_room_with_players(case)
+            tworooms.players = self.generate_players_dict(case)
             tworooms.assign_rooms()
             tworooms.assign_leaders_randomly()
             self.assert_rooms_are_valid(tworooms)
@@ -121,11 +121,13 @@ class RoomTests(unittest.TestCase):
             self.assertTrue(tworooms.rooms[1].leader in tworooms.rooms[1].players)
 
     @staticmethod
-    def generate_room_with_players(num_players):
-        d = dict()
+    def generate_players_dict(num_players):
+        players = dict()
         for i in range(num_players):
-            d[i] = mock.Mock()
-        return d
+            player = mock.Mock()
+            player.user.mention = f'@{i}'
+            players[i] = player
+        return players
 
     def assert_rooms_are_valid(self, tworooms):
         for player in tworooms.players.values():
@@ -137,9 +139,19 @@ class AsyncRoomTests(asynctest.TestCase):
     @mock.patch('games.two_rooms.room.Room.send_message')
     async def test_round_start_event(self, send_response_mock):
         tworooms = TwoRooms(mock.Mock(), mock.Mock())
-        tworooms.players = RoomTests.generate_room_with_players(12)
+        tworooms.players = RoomTests.generate_players_dict(12)
+        tworooms.assign_rooms()
         await tworooms.events.fire('on_round_start', 1)
-        self.assertNotEqual(0, send_response_mock.call_count)
+        self.assertEqual(2, send_response_mock.call_count)
+
+        first_message = self.get_mock_send_parameter(send_response_mock, 0)
+        second_message = self.get_mock_send_parameter(send_response_mock, 1)
+        self.assertTrue('start of round 1' in first_message and 'start of round 1' in second_message)
+        self.assertNotEqual(first_message, second_message)
+
+    @staticmethod
+    def get_mock_send_parameter(send_response_mock, call_number):
+        return send_response_mock.mock_calls[call_number][1][0]
 
 
 if __name__ == "__main__":

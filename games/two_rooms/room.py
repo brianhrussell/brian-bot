@@ -24,7 +24,10 @@ class Room:
         self.players.remove(player)
 
     async def on_round_start_event(self, round_number):
-        await self.send_message(f'start of round {round_number}')
+        msg = [f'start of round {round_number}\nplayers in this room:']
+        for player in self.players:
+            msg.append(player.user.mention)
+        await self.send_message('\n'.join(msg))
 
     def guess_main_channel(self):
         channels = self.role.guild.channels
