@@ -44,10 +44,10 @@ class RoleTracker:
 
     def get_selected_role_names(self):
         selected_roles = list()
-        for role_name in self.role_factory:
-            count = sum(1 for i in self.unassigned_roles if i.name.lower() == role_name.lower())
+        for role_class in self.role_factory.values():
+            count = sum(1 for role in self.unassigned_roles if isinstance(role, role_class))
             if count != 0:
-                selected_roles.append(role_name + f' x{count}')
+                selected_roles.append(role_class().name + f' x{count}')
         return '\n'.join(selected_roles)
 
     def roles_are_valid(self, num_players):

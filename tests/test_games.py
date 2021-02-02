@@ -88,7 +88,7 @@ class TwoRoomsGameTests(test_helpers.BotCommandTest):
         await game_handler.handle(['selected-roles'], message_mock, client_mock)
 
         self.assertEqual(4, send_response_mock.call_count)
-        self.assertTrue('selected roles:\npresident x1\nbomb x1' in test_helpers.sent_messages[3])
+        self.assertTrue('selected roles:\nPresident x1\nBomb x1' in test_helpers.sent_messages[3])
 
     @mock.patch('commands.base_command.BaseCommand.send_response')
     async def test_tworoomsgamewithtworoles_begingame_rolesarenotvalid(self, send_response_mock):
