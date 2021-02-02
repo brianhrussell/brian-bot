@@ -107,17 +107,17 @@ class TwoRoomsGameTests(test_helpers.BotCommandTest):
 class RoomTests(asynctest.TestCase):
     async def test_assign_players_to_rooms(self):
         for case in [2, 4, 7, 10, 31]:
-            tworooms = TwoRooms(Mock(), Mock())
+            tworooms = await self.create_tworooms_for_test()
             tworooms.players = await self.generate_players_dict(case)
             await tworooms.assign_rooms()
             self.assertTrue(self.rooms_are_valid(tworooms))
 
     async def test_assign_leaders_randomly(self):
         for case in [2, 4, 7, 10, 31]:
-            tworooms = TwoRooms(Mock(), Mock())
+            tworooms = await self.create_tworooms_for_test()
             tworooms.players = await self.generate_players_dict(case)
             await tworooms.assign_rooms()
-            tworooms.assign_leaders_randomly()
+            await tworooms.assign_leaders_randomly()
             self.assertTrue(self.rooms_are_valid(tworooms))
             self.assertTrue(tworooms.rooms[0].leader in tworooms.rooms[0].players)
             self.assertTrue(tworooms.rooms[1].leader in tworooms.rooms[1].players)
@@ -176,13 +176,18 @@ class RoomTests(asynctest.TestCase):
         self.assertTrue('game has finished' in self.get_mock_send_parameter(channel_mock, 0))
 
     @staticmethod
-    async def create_test_tworooms_game(num_players):
-        tworooms = TwoRooms(Mock(), Mock())
-        tworooms.players = await RoomTests.generate_players_dict(num_players)
-        await tworooms.assign_rooms()
+    async def create_tworooms_for_test():
+        tworooms = TwoRooms(Mock(name='guild'), Mock(name='client'))
         tworooms.rooms[0].channel = test_helpers.MockDiscordChannel()
         tworooms.rooms[1].channel = test_helpers.MockDiscordChannel()
-        tworooms.assign_leaders_randomly()
+        return tworooms
+
+    @staticmethod
+    async def create_test_tworooms_game(num_players):
+        tworooms = await RoomTests.create_tworooms_for_test()
+        tworooms.players = await RoomTests.generate_players_dict(num_players)
+        await tworooms.assign_rooms()
+        await tworooms.assign_leaders_randomly()
         tworooms.state = TwoRoomsState.PLAYING
         tworooms.round = 1
         return tworooms

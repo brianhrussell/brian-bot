@@ -30,7 +30,7 @@ class Room:
     def guess_main_channel(self):
         channels = self.discord_role.guild.channels
         for channel in channels:
-            if type(channel) is not discord.TextChannel or self.discord_role not in channel.overwrites:
+            if not isinstance(channel, discord.TextChannel) or self.discord_role not in channel.overwrites:
                 continue
             if channel.overwrites[self.discord_role].send_messages:
                 return channel
@@ -50,6 +50,13 @@ class Room:
                 continue
             status.append(player.user.mention)
         return '\n'.join(status)
+
+    async def set_leader(self, leader):
+        old_leader = self.leader
+        self.leader = leader
+        await self.events.fire('on_leader_changed', self, old_leader, leader)
+        if old_leader is not None:
+            await self.send_message(f'room leader changed to {leader.user.mention}')
 
 # EVENT HANDLERS
 

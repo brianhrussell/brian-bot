@@ -62,6 +62,7 @@ class TwoRooms(JoinableGame):
         yield GameCommand('send', TwoRooms.set_sent_hostage,
                           'chooses a player to send as a hostage at the end of this round')
         yield GameCommand('test-dm', TwoRooms.send_test_dm, 'send a test dm to all players')
+        yield GameCommand('abdicate', TwoRooms.abdicate_leader, 'as a room leader abdicate to another player')
 
     async def assign_roles(self):
         for user in self.joined_users:
@@ -83,9 +84,9 @@ class TwoRooms(JoinableGame):
         for player in unassigned_players:
             await self.rooms[1].add_player(player)
 
-    def assign_leaders_randomly(self):
+    async def assign_leaders_randomly(self):
         for room in self.rooms:
-            room.leader = choice(room.players)
+            await room.set_leader(choice(room.players))
 
     def get_room_for_player(self, player):
         for room in self.rooms:
@@ -163,7 +164,8 @@ class TwoRooms(JoinableGame):
             return 'not a valid state to remove a role'
 
         if len(params) == 0:
-            return 'provide a role name to remove try using `!game list-roles` or clear all roles with `!game clear-roles`'
+            return 'provide a role name to remove try using `!game list-roles` or clear all roles with `!game ' \
+                   'clear-roles` '
         for param in params:
             if param.lower() not in self.role_tracker.role_factory:
                 return f'{param} is not a valid role. use  `!game list-roles` to see a list of available roles.'
@@ -174,7 +176,7 @@ class TwoRooms(JoinableGame):
         lines = list()
         for role_name in self.role_tracker.role_factory:
             role = self.role_tracker.role_factory[role_name]()
-            lines.append(role.to_string())
+            lines.append(f'`{role_name}`\n{role.to_string()}')
         return '\n\n'.join(lines)
 
     def clear_roles(self, params, message, client):
@@ -245,6 +247,22 @@ class TwoRooms(JoinableGame):
         if not msg:
             return 'sent DMs'
         return '\n'.join(msg)
+
+    async def abdicate_leader(self, params, message, client):
+        if self.state != TwoRoomsState.PLAYING:
+            return 'game needs to be started to use this command'
+        player = self.players[message.author]
+        room = self.get_room_for_player(player)
+        if room.leader is not player:
+            return 'you need to be the leader to abdicate'
+        if len(message.mentions) != 1:
+            return 'please mention exactly one player'
+        if message.mentions[0] not in self.players:
+            return 'could not find that user in the game'
+        new_leader = self.players[message.mentions[0]]
+        if room is not self.get_room_for_player(new_leader):
+            return 'that player is not in your room'
+        await room.set_leader(new_leader)
 
     # EVENT HANDLERS
     async def on_hostages_set_event(self, room):

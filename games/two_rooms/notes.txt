@@ -1,5 +1,4 @@
 TODOS:
-test exchange hostages
 let leader abdicate
 vote on leaders
 use the bot to reveal instead of ppl just talking
