@@ -1,6 +1,19 @@
 from games.two_rooms.roles.role_utils import BaseRole, CardColor, TeamColor
 
 
+class TestRole(BaseRole):
+    def __init__(self):
+        super().__init__(
+            name="Test Role",
+            directions="TODO.",
+            color=CardColor.BLUE,
+            team=TeamColor.BLUE,
+            max_role_count=0,
+            modifiers=list(),
+            required_roles=[],
+            allows_buried_role=False)
+
+
 class BlueTeamRole(BaseRole):
     def __init__(self):
         super().__init__(

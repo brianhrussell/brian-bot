@@ -43,4 +43,4 @@ class JoinableGame(BaseGame):
             # TODO test this >_>
             return f'{player} has already joined.'
         self.joined_users[player_id] = player
-        return f'added {player} to the game.'
+        return f'added {player.mention} to the game.'

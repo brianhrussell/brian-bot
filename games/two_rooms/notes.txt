@@ -3,13 +3,15 @@ let leader abdicate
 use the bot to reveal instead of ppl just talking
 vote on leaders
 add more roles
+figure out how to work around message history
 figure out how to handle private reveal like agent
+!g room-roles should remove those roles from everyone in the server probably
 
 TwoRoomsGame
 - handles messages from discord
 - move game state to a separate class that side effects of messages?
 
-where does seomthing like rooms, tracking which players have interacted, adn the logic of players sharing cards go?
+where does something like rooms, tracking which players have interacted, adn the logic of players sharing cards go?
 
 
 what will a role need to have?

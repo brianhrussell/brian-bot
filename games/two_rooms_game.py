@@ -65,7 +65,7 @@ class TwoRooms(JoinableGame):
         yield GameCommand('abdicate', TwoRooms.abdicate_leader, 'as a room leader abdicate to another player')
 
     async def assign_roles(self):
-        for user in self.joined_users:
+        for user in self.joined_users.values():
             player = Player(user)
             await player.set_role(self.role_tracker.deal_role())
             self.players[user] = player
@@ -194,7 +194,7 @@ class TwoRooms(JoinableGame):
             return 'not a valid state to begin a game'
         player_id = message.author.id
         num_players = len(self.joined_users)
-        if num_players < 4:
+        if num_players < 1:
             return 'you need more people to play'
         if not self.role_tracker.roles_are_valid(num_players):
             return "the selected roles are not valid sorry," + \
@@ -210,12 +210,14 @@ class TwoRooms(JoinableGame):
             await self.assign_rooms()
             self.state = TwoRoomsState.PLAYING
             self.round = 1
-            self.assign_leaders_randomly()
+            await self.assign_leaders_randomly()
             self.events.register('on_hostages_set', self.on_hostages_set_event)
             self.events.register('on_round_start', self.on_round_start_event)
             await self.events.fire('on_round_start', 1)
         except Forbidden as e:
             return f'the bot is missing the permissions it needs message: {e}'
+        except Exception as e:
+            return f'something went wrong starting the game: {e}'
 
     async def set_sent_hostage(self, params, message, client):
         if self.state != TwoRoomsState.PLAYING:
