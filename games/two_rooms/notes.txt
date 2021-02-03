@@ -1,7 +1,7 @@
 TODOS:
 let leader abdicate
-vote on leaders
 use the bot to reveal instead of ppl just talking
+vote on leaders
 add more roles
 figure out how to handle private reveal like agent
 
